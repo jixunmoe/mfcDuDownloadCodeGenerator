@@ -60,6 +60,7 @@ public:
 	afx_msg void OnBnClickedBtnClear();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	CButton m_chkRecursive;
+	CButton m_chkUrl;
 	CLinkCtrl m_linkBlog;
 	afx_msg void OnClickSyslinkBlog(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedBtnCopy();

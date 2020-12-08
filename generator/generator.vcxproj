@@ -24,20 +24,20 @@
     <RootNamespace>generator</RootNamespace>
     <Keyword>MFCProj</Keyword>
     <ProjectName>gen</ProjectName>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
@@ -45,14 +45,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
@@ -191,9 +191,11 @@
   <ItemGroup>
     <ClInclude Include="AdvEdit.h" />
     <ClInclude Include="appDlg.h" />
+    <ClInclude Include="encoding.h" />
     <ClInclude Include="FileItem.h" />
     <ClInclude Include="generator.h" />
     <ClInclude Include="Hasher.h" />
+    <ClInclude Include="base64.h" />
     <ClInclude Include="ListBoxEx.h" />
     <ClInclude Include="ProgressText.h" />
     <ClInclude Include="Resource.h" />
@@ -204,6 +206,8 @@
   <ItemGroup>
     <ClCompile Include="AdvEdit.cpp" />
     <ClCompile Include="appDlg.cpp" />
+    <ClCompile Include="base64.cpp" />
+    <ClCompile Include="encoding.cpp" />
     <ClCompile Include="FileItem.cpp" />
     <ClCompile Include="generator.cpp" />
     <ClCompile Include="Hasher.cpp" />
