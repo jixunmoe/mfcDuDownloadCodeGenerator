@@ -271,10 +271,6 @@ void CAppDlg::ProcessFiles()
 	m_btnGenerate.EnableWindow(TRUE);
 }
 
-static std::string ConvertCStringToUTF8(CString strValue)
-{
-}
-
 void CAppDlg::AddHashEntry(LPFileItemStruct data)
 {
 	m_editOutput.Append(data->DownloadCode());
