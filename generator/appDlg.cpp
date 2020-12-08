@@ -8,6 +8,7 @@
 #include "afxdialogex.h"
 #include "utils.h"
 #include <fileapi.h>
+#include "b64.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -66,6 +67,7 @@ void CAppDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST_FILES, m_listFiles);
 	DDX_Control(pDX, IDC_EDIT_OUTPUT, m_editOutput);
 	DDX_Control(pDX, IDC_CHK_RECURSIVE, m_chkRecursive);
+	DDX_Control(pDX, IDC_CHK_URL, m_chkUrl);
 	DDX_Control(pDX, IDC_SYSLINK_BLOG, m_linkBlog);
 	DDX_Control(pDX, IDC_BTN_ADD_DIR, m_btnAddDir);
 	DDX_Control(pDX, IDC_BTN_ADD_FILE, m_btnAddFile);
@@ -143,7 +145,10 @@ BOOL CAppDlg::OnInitDialog()
 
 	// 初始化目录选择
 	CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
-
+	m_dragTip.Create(this);
+	m_dragTip.AddTool(GetDlgItem(IDC_LIST_FILES), _T("可将文件拖拽到这里"));
+	m_dragTip.SetDelayTime(500);
+	m_dragTip.Activate(TRUE);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -270,10 +275,45 @@ void CAppDlg::ProcessFiles()
 	m_btnGenerate.EnableWindow(TRUE);
 }
 
+static std::string ConvertCStringToUTF8(CString strValue)
+{
+	std::wstring wbuffer;
+#ifdef _UNICODE
+	wbuffer.assign(strValue.GetString(), strValue.GetLength());
+#else
+	/*
+	 * 转换ANSI到UNICODE
+	 * 获取转换后长度
+	 */
+	int length = ::MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, (LPCTSTR)strValue, -1, NULL, 0);
+	wbuffer.resize(length);
+	/* 转换 */
+	MultiByteToWideChar(CP_ACP, 0, (LPCTSTR)strValue, -1, (LPWSTR)(wbuffer.data()), wbuffer.length());
+#endif
+
+	/* 获取转换后长度 */
+	int length = WideCharToMultiByte(CP_UTF8, 0, wbuffer.data(), wbuffer.size(), NULL, 0, NULL, NULL);
+	/* 获取转换后内容 */
+	std::string buffer;
+	buffer.resize(length);
+
+	WideCharToMultiByte(CP_UTF8, 0, strValue, -1, (LPSTR)(buffer.data()), length, NULL, NULL);
+	return(buffer);
+}
+
 void CAppDlg::AddHashEntry(LPFileItemStruct data)
 {
-	m_editOutput.Append(data->DownloadCode());
+	CString dlcode;
+	dlcode = data->DownloadCode();
+	m_editOutput.Append(dlcode);
 	m_editOutput.Append(_T("\r\n"));
+	if (m_chkUrl.GetCheck()) {
+		CString tmp,b;
+		tmp = CString(ConvertCStringToUTF8(dlcode).c_str());
+		b=base64encode(tmp, tmp.GetLength());
+		m_editOutput.Append(_T("https://pan.baidu.com/#bdlink=")+b);
+		m_editOutput.Append(_T("\r\n"));
+	}
 }
 
 void CAppDlg::ProcFile(ProcType proc, double progress, LPFileItemStruct lp_item)
@@ -328,6 +368,9 @@ void CAppDlg::OnCancel()
 void CAppDlg::OnBnClickedBtnClear()
 {
 	m_listFiles.ResetContent();
+	m_progAll.SetMax(0);
+	m_progAll.SetCurrent(0);
+	m_dragTip.Activate(TRUE);
 	m_editOutput.SetWindowText(_T(""));
 }
 
@@ -361,6 +404,7 @@ void CAppDlg::OnDropFiles(HDROP hDropInfo)
 
 	DragFinish(hDropInfo);
 	CDialogEx::OnDropFiles(hDropInfo);
+	m_dragTip.Activate(FALSE);
 }
 
 

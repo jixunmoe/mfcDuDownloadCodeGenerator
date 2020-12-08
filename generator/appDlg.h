@@ -50,6 +50,25 @@ protected:
 public:
 	afx_msg void OnBnClickedGenerate();
 	// Current file Progress
+	CToolTipCtrl m_dragTip;
+	BOOL PreTranslateMessage(MSG* pMsg)
+	{
+		if (pMsg->message == WM_MOUSEMOVE)
+			m_dragTip.RelayEvent(pMsg);
+		// ÏìÓ¦Ctrl+A
+		CEdit* pEdit = (CEdit*)GetDlgItem(IDC_EDIT_OUTPUT);
+		if (pMsg->message == WM_KEYDOWN &&
+			pMsg->hwnd == pEdit->GetSafeHwnd())
+		{
+			if ((GetKeyState(VK_CONTROL) & 0x8000) && pMsg->wParam == 'A')
+			{
+				CString buf;
+				GetDlgItemText(IDC_EDIT_OUTPUT, buf);
+				pEdit->SetSel(0, buf.GetLength());
+			}
+		}
+		return CDialog::PreTranslateMessage(pMsg);
+	}
 	CProgressCtrl m_progFile;
 	CProgressText m_progAll;
 	CListBoxEx m_listFiles;
@@ -60,6 +79,7 @@ public:
 	afx_msg void OnBnClickedBtnClear();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	CButton m_chkRecursive;
+	CButton m_chkUrl;
 	CLinkCtrl m_linkBlog;
 	afx_msg void OnClickSyslinkBlog(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedBtnCopy();
