@@ -17,6 +17,7 @@ public:
 	bool Done() const;
 	CString GetSizeString() const;
 
+	CString BDLink() const;
 	CString DownloadCode() const;
 };
 

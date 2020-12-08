@@ -12,6 +12,7 @@
 #define IDS_FILE_SIZE                   105
 #define IDS_FILE_INFO                   106
 #define IDS_LIST_PLACEHOLDER            107
+#define IDS_ERROR_ENCODE_FAIL           108
 #define IDR_MAINFRAME                   128
 #define IDI_ICON_TICK                   131
 #define IDC_LIST_FILES                  1000

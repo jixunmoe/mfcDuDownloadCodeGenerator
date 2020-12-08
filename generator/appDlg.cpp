@@ -273,7 +273,12 @@ void CAppDlg::ProcessFiles()
 
 void CAppDlg::AddHashEntry(LPFileItemStruct data)
 {
-	m_editOutput.Append(data->DownloadCode());
+	if (m_chkUrl.GetCheck() == BST_CHECKED) {
+		m_editOutput.Append(data->BDLink());
+	}
+	else {
+		m_editOutput.Append(data->DownloadCode());
+	}
 	m_editOutput.Append(_T("\r\n"));
 }
 

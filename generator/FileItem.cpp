@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "FileItem.h"
-
+#include "encoding.h"
+#include "base64.h"
+#include "resource.h"
 
 CFileItem::CFileItem()
 {
@@ -44,6 +46,34 @@ CString CFileItem::GetSizeString() const
 	CString str;
 	str.Format(_T("%.2f %s"), r, sizes[unit]);
 	return str;
+}
+
+CString CFileItem::BDLink() const
+{
+	CString result;
+	CString dlCode = this->DownloadCode();
+	utf8_str str = {};
+	ToUTF8(str, dlCode.GetBuffer());
+	if (str.str == nullptr) {
+		BOOL _ = result.LoadStringW(IDS_ERROR_ENCODE_FAIL);
+		return result;
+	}
+
+	// 使用 strlen 计算字符串大小，防止 base64 变化后的内容含有 NUL 字节
+	wchar_t* encoded = base64_encode(reinterpret_cast<unsigned char*>(str.str), strlen(str.str));
+	free(str.str);
+
+	if (encoded == nullptr) {
+		BOOL _ = result.LoadStringW(IDS_ERROR_ENCODE_FAIL);
+		return result;
+	}
+
+	// 拼接地址
+	result.Append(_T("https://pan.baidu.com/#bdlink="));
+	result.Append(encoded);
+
+	free(encoded);
+	return result;
 }
 
 CString CFileItem::DownloadCode() const
