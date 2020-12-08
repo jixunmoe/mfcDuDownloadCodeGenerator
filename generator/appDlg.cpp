@@ -8,7 +8,7 @@
 #include "afxdialogex.h"
 #include "utils.h"
 #include <fileapi.h>
-#include "b64.h"
+#include "base64.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -145,10 +145,6 @@ BOOL CAppDlg::OnInitDialog()
 
 	// 初始化目录选择
 	CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
-	m_dragTip.Create(this);
-	m_dragTip.AddTool(GetDlgItem(IDC_LIST_FILES), _T("可将文件拖拽到这里"));
-	m_dragTip.SetDelayTime(500);
-	m_dragTip.Activate(TRUE);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -289,17 +285,17 @@ void CAppDlg::ProcFile(ProcType proc, double progress, LPFileItemStruct lp_item)
 {
 	switch(proc)
 	{
-	case FILE_PROG: 
+	case ProcType::FILE_PROG: 
 		m_progFile.SetPos(int(progress * 10000));
 		break;
 
-	case INC_FILE:
+	case ProcType::INC_FILE:
 		m_progFile.SetPos(0);
 		m_progAll.Increase();
 		AddHashEntry(lp_item);
 		break;
 
-	case ERR_FILE:
+	case ProcType::ERR_FILE:
 		OutputDebugString(_T("Failed to process file.\n"));
 		m_progAll.Increase(); 
 		break;
@@ -338,7 +334,6 @@ void CAppDlg::OnBnClickedBtnClear()
 {
 	m_listFiles.ResetContent();
 	m_progAll.SetCurrent(0);
-	m_dragTip.Activate(TRUE);
 	m_editOutput.SetWindowText(_T(""));
 }
 
@@ -372,7 +367,6 @@ void CAppDlg::OnDropFiles(HDROP hDropInfo)
 
 	DragFinish(hDropInfo);
 	CDialogEx::OnDropFiles(hDropInfo);
-	m_dragTip.Activate(FALSE);
 }
 
 

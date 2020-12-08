@@ -4,19 +4,6 @@
 std::vector<CString*> OpenFileDialog(CString &title, HWND hWnd);
 std::vector<CString*> OpenDirectoryDialog(CString &title, HWND hWnd);
 
-inline CStringA W2UTF8(const CString &input, DWORD &size)
-{
-	CStringA utf8;
-	auto cc = WideCharToMultiByte(CP_UTF8, MB_ERR_INVALID_CHARS, input, -1, nullptr, 0, nullptr, nullptr) - 1;
-	if (cc <= 0) return utf8;
-
-	auto ptr = utf8.GetBuffer(cc);
-	WideCharToMultiByte(CP_UTF8, MB_ERR_INVALID_CHARS, input, -1, ptr, cc, nullptr, nullptr);
-	utf8.ReleaseBuffer();
-
-	return utf8;
-}
-
 typedef void(*f_file_callback) (const CString &strDir, const CString &strName, void* extra);
 inline void EnumFiles(const CString &srcDir, bool recursive, f_file_callback cb, void* extra = nullptr)
 {
@@ -72,7 +59,15 @@ inline void CopyStringToClipboard(CString &str)
 	auto strW = static_cast<const TCHAR*>(str);
 	auto len = str.GetLength() * sizeof TCHAR + (sizeof TCHAR);
 	HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, len);
-	memcpy(GlobalLock(hMem), strW, len);
+	if (!hMem) return;
+
+	auto lockedMem = GlobalLock(hMem);
+	if (!lockedMem) {
+		GlobalFree(hMem);
+		return;
+	}
+
+	memcpy(lockedMem, strW, len);
 	GlobalUnlock(hMem);
 	OpenClipboard(nullptr);
 	EmptyClipboard();
@@ -82,4 +77,5 @@ inline void CopyStringToClipboard(CString &str)
 	SetClipboardData(CF_UNICODETEXT, hMem);
 #endif
 	CloseClipboard();
+	GlobalFree(hMem);
 }

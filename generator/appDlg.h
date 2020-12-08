@@ -50,7 +50,6 @@ protected:
 public:
 	afx_msg void OnBnClickedGenerate();
 	// Current file Progress
-	CToolTipCtrl m_dragTip;
 	CProgressCtrl m_progFile;
 	CProgressText m_progAll;
 	CListBoxEx m_listFiles;
