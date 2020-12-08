@@ -23,8 +23,8 @@ public:
 	CAppDlg(CWnd* pParent = NULL);	// standard constructor
 	void AddFile(const CString& srcDir, const CString& filename);
 	void ProcessFiles();
-	void AddHashEntry(LPFileItemStruct lp_item);
-	void ProcFile(ProcType proc, double progress, LPFileItemStruct lp_item);
+	void AddHashEntry(CFileItem* lp_item);
+	void ProcFile(ProcType proc, double progress, CFileItem* lp_item);
 	void RealExit();
 	std::vector<CString*> files;
 

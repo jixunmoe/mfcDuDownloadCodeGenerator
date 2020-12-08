@@ -242,7 +242,7 @@ void CAppDlg::AddFile(const CString& srcDir, const CString& filename)
 	m_listFiles.AddItem(srcDir, filename);
 }
 
-void _proc_file_callback(ProcType type, double progress, LPFileItemStruct lpItem, void* extra)
+void _proc_file_callback(ProcType type, double progress, CFileItem* lpItem, void* extra)
 {
 	static_cast<CAppDlg*>(extra)->ProcFile(type, progress, lpItem);
 }
@@ -271,7 +271,7 @@ void CAppDlg::ProcessFiles()
 	m_btnGenerate.EnableWindow(TRUE);
 }
 
-void CAppDlg::AddHashEntry(LPFileItemStruct data)
+void CAppDlg::AddHashEntry(CFileItem* data)
 {
 	if (m_chkUrl.GetCheck() == BST_CHECKED) {
 		m_editOutput.Append(data->BDLink());
@@ -282,7 +282,7 @@ void CAppDlg::AddHashEntry(LPFileItemStruct data)
 	m_editOutput.Append(_T("\r\n"));
 }
 
-void CAppDlg::ProcFile(ProcType proc, double progress, LPFileItemStruct lp_item)
+void CAppDlg::ProcFile(ProcType proc, double progress, CFileItem* lp_item)
 {
 	switch(proc)
 	{

@@ -106,7 +106,7 @@ void CListBoxEx::ProcessFiles(f_proc_file_callback cb, void* extra)
 	Hasher hash(CALG_MD5);
 	for(auto i = 0; i < c; i++)
 	{
-		auto data = reinterpret_cast<LPFileItemStruct>(GetItemData(i));
+		auto data = reinterpret_cast<CFileItem*>(GetItemData(i));
 		if (data->Done())
 		{
 			cb(ProcType::INC_FILE, 0, data, extra);
@@ -207,7 +207,7 @@ void CListBoxEx::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 	lpMeasureItemStruct->itemHeight = 48 + 4*2 + 8;
 }
 
-void CListBoxEx::DrawItemData(LPDRAWITEMSTRUCT lpDrawItemStruct, FileItemStruct* pItem)
+void CListBoxEx::DrawItemData(LPDRAWITEMSTRUCT lpDrawItemStruct, CFileItem* pItem)
 {
 	auto pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 	pDC->SetBkMode(TRANSPARENT);
@@ -268,7 +268,7 @@ void CListBoxEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	auto pData = GetItemDataPtr(lpDrawItemStruct->itemID);
 	if (pData != (void*)-1) {
-		this->DrawItemData(lpDrawItemStruct, reinterpret_cast<FileItemStruct*>(pData));
+		this->DrawItemData(lpDrawItemStruct, reinterpret_cast<CFileItem*>(pData));
 	}
 
 }
@@ -290,7 +290,7 @@ int CListBoxEx::AddItem(const CString& srcDir, const CString& filename)
 	auto fSize = FileSize(fullPath);
 
 	auto index = this->AddString(_T(""));
-	auto data = new FileItemStruct();
+	auto data = new CFileItem();
 	data->m_pDirectory = new CString(srcDir);
 	data->m_pFilename = new CString(filename);
 

@@ -2,7 +2,6 @@
 #include <mutex>
 
 #include "FileItem.h"
-typedef CFileItem FileItemStruct, *LPFileItemStruct;
 
 // CListBoxEx
 
@@ -13,7 +12,7 @@ enum class ProcType
 	ERR_FILE
 };
 
-typedef void(*f_proc_file_callback) (ProcType type, double progress, LPFileItemStruct, void* extra);
+typedef void(*f_proc_file_callback) (ProcType type, double progress, CFileItem* pItem, void* extra);
 class CListBoxEx : public CListBox
 {
 	DECLARE_DYNAMIC(CListBoxEx)
@@ -50,7 +49,7 @@ public:
 	virtual void DrawItem(LPDRAWITEMSTRUCT /*lpDrawItemStruct*/);
 	virtual void PreSubclassWindow();
 
-	void DrawItemData(LPDRAWITEMSTRUCT lpDrawItemStruct, FileItemStruct* pItem);
+	void DrawItemData(LPDRAWITEMSTRUCT lpDrawItemStruct, CFileItem* pItem);
 
 	int AddItem(const CString& srcDir, const CString& filename);
 //	afx_msg void OnLbnSelchange();
