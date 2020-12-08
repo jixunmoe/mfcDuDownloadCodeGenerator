@@ -334,7 +334,7 @@ void CAppDlg::OnCancel()
 void CAppDlg::OnBnClickedBtnClear()
 {
 	m_listFiles.ResetContent();
-	m_progAll.SetCurrent(0);
+	m_progAll.Reset();
 	m_editOutput.SetWindowText(_T(""));
 }
 
