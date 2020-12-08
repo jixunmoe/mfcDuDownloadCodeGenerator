@@ -11,7 +11,7 @@
 #include <minwinbase.h>
 #include "utils.h"
 
-#define MIN_FILE_SIZE 256 * 1024
+#define BD_FILE_HEADER_SIZE (256 * 1024)
 
 // CListBoxEx
 
@@ -95,7 +95,7 @@ bool CListBoxEx::RedrawIfVisible(int i)
 
 
 // 4MB Buffer 
-#define BUF_SIZE 1024*1024*4
+#define BUF_SIZE (1024*1024*4)
 void CListBoxEx::ProcessFiles(f_proc_file_callback cb, void* extra)
 {
 	std::lock_guard<std::mutex> guard(mutex);
@@ -123,10 +123,23 @@ void CListBoxEx::ProcessFiles(f_proc_file_callback cb, void* extra)
 			break;
 		}
 
-		is.read(buffer, MIN_FILE_SIZE);
+		is.read(buffer, BD_FILE_HEADER_SIZE);
 		hash.Init();
-		hash.Feed(buffer, MIN_FILE_SIZE);
+		hash.Feed(buffer, int(is.gcount()));
 		data->m_pFirstHash = hash.GetHashStr();
+
+		// 已经读完了?
+		if (is.eof()) {
+			is.close();
+
+			// 更新完整哈希
+			data->m_pFullHash = new CString(*data->m_pFirstHash);
+
+			// 重绘 + 通知
+			this->RedrawIfVisible(i);
+			cb(ProcType::INC_FILE, 0, data, extra);
+			continue;
+		}
 
 		is.seekg(0, SEEK_SET);
 		hash.Init();
@@ -255,7 +268,6 @@ void CListBoxEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	auto pData = GetItemDataPtr(lpDrawItemStruct->itemID);
 	if (pData != (void*)-1) {
-		OutputDebugStringA("Draw item");
 		this->DrawItemData(lpDrawItemStruct, reinterpret_cast<FileItemStruct*>(pData));
 	}
 
@@ -276,10 +288,6 @@ int CListBoxEx::AddItem(const CString& srcDir, const CString& filename)
 
 	auto fullPath(srcDir + _T("\\") + filename);
 	auto fSize = FileSize(fullPath);
-	if (fSize < MIN_FILE_SIZE)
-	{
-		return -1;
-	}
 
 	auto index = this->AddString(_T(""));
 	auto data = new FileItemStruct();
