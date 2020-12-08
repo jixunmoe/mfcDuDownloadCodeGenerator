@@ -50,6 +50,7 @@ protected:
 public:
 	afx_msg void OnBnClickedGenerate();
 	// Current file Progress
+	CToolTipCtrl m_dragTip;
 	CProgressCtrl m_progFile;
 	CProgressText m_progAll;
 	CListBoxEx m_listFiles;
@@ -60,6 +61,7 @@ public:
 	afx_msg void OnBnClickedBtnClear();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	CButton m_chkRecursive;
+	CButton m_chkUrl;
 	CLinkCtrl m_linkBlog;
 	afx_msg void OnClickSyslinkBlog(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedBtnCopy();
