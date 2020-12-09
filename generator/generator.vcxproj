@@ -23,7 +23,7 @@
     <ProjectGuid>{52BE8E83-C47E-469F-92B7-F078C51C0EBD}</ProjectGuid>
     <RootNamespace>generator</RootNamespace>
     <Keyword>MFCProj</Keyword>
-    <ProjectName>gen</ProjectName>
+    <ProjectName>ducode</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
