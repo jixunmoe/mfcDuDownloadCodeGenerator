@@ -25,7 +25,7 @@ public:
 	void SetCurrent(uint current);
 	void SetMax(uint max);
 	void Increase();
-
+	void Reset();
 
 protected:
 	DECLARE_MESSAGE_MAP()

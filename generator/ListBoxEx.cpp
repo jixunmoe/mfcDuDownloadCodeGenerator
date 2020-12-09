@@ -11,17 +11,27 @@
 #include <minwinbase.h>
 #include "utils.h"
 
-#define MIN_FILE_SIZE 256 * 1024
+#define BD_FILE_HEADER_SIZE (256 * 1024)
 
 // CListBoxEx
 
 IMPLEMENT_DYNAMIC(CListBoxEx, CListBox)
 HICON CListBoxEx::m_hIconTick = nullptr;
+CString CListBoxEx::m_sPlaceholder;
+HFONT CListBoxEx::m_systemFont;
 CListBoxEx::CListBoxEx()
 {
+	// init guard
 	if (m_hIconTick == nullptr)
 	{
 		m_hIconTick = static_cast<HICON>(LoadImage(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON_TICK), IMAGE_ICON, 16, 16, 0));
+		int _ = m_sPlaceholder.LoadStringW(IDS_LIST_PLACEHOLDER);
+
+		NONCLIENTMETRICS metrics = {};
+		metrics.cbSize = sizeof(metrics);
+		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, 0, &metrics, 0);
+		m_systemFont = CreateFontIndirect(&metrics.lfCaptionFont);
+		CString placeholder;
 	}
 }
 
@@ -33,6 +43,7 @@ CListBoxEx::~CListBoxEx()
 BEGIN_MESSAGE_MAP(CListBoxEx, CListBox)
 	ON_WM_VKEYTOITEM_REFLECT()
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText)
+	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 
@@ -84,7 +95,7 @@ bool CListBoxEx::RedrawIfVisible(int i)
 
 
 // 4MB Buffer 
-#define BUF_SIZE 1024*1024*4
+#define BUF_SIZE (1024*1024*4)
 void CListBoxEx::ProcessFiles(f_proc_file_callback cb, void* extra)
 {
 	std::lock_guard<std::mutex> guard(mutex);
@@ -95,10 +106,10 @@ void CListBoxEx::ProcessFiles(f_proc_file_callback cb, void* extra)
 	Hasher hash(CALG_MD5);
 	for(auto i = 0; i < c; i++)
 	{
-		auto data = reinterpret_cast<LPFileItemStruct>(GetItemData(i));
+		auto data = reinterpret_cast<CFileItem*>(GetItemData(i));
 		if (data->Done())
 		{
-			cb(INC_FILE, 0, data, extra);
+			cb(ProcType::INC_FILE, 0, data, extra);
 			continue;
 		}
 
@@ -107,15 +118,28 @@ void CListBoxEx::ProcessFiles(f_proc_file_callback cb, void* extra)
 
 		if (!is)
 		{
-			cb(ERR_FILE, 0, nullptr, extra);
+			cb(ProcType::ERR_FILE, 0, nullptr, extra);
 			is.close();
 			break;
 		}
 
-		is.read(buffer, MIN_FILE_SIZE);
+		is.read(buffer, BD_FILE_HEADER_SIZE);
 		hash.Init();
-		hash.Feed(buffer, MIN_FILE_SIZE);
+		hash.Feed(buffer, int(is.gcount()));
 		data->m_pFirstHash = hash.GetHashStr();
+
+		// 已经读完了?
+		if (is.eof()) {
+			is.close();
+
+			// 更新完整哈希
+			data->m_pFullHash = new CString(*data->m_pFirstHash);
+
+			// 重绘 + 通知
+			this->RedrawIfVisible(i);
+			cb(ProcType::INC_FILE, 0, data, extra);
+			continue;
+		}
 
 		is.seekg(0, SEEK_SET);
 		hash.Init();
@@ -141,7 +165,7 @@ void CListBoxEx::ProcessFiles(f_proc_file_callback cb, void* extra)
 				str.Format(_T("state: %x (goodbit: 0, eof: 1, fail: 2, badbit: 4)\n"), is.rdstate());
 				OutputDebugString(str);
 #endif
-				cb(ERR_FILE, 0, nullptr, extra);
+				cb(ProcType::ERR_FILE, 0, nullptr, extra);
 				break;
 			}
 
@@ -158,11 +182,11 @@ void CListBoxEx::ProcessFiles(f_proc_file_callback cb, void* extra)
 #endif
 
 				}
-				cb(INC_FILE, 0, data, extra);
+				cb(ProcType::INC_FILE, 0, data, extra);
 				break;
 			}
 			prog += step;
-			cb(FILE_PROG, prog, data, extra);
+			cb(ProcType::FILE_PROG, prog, data, extra);
 		} while (true);
 		is.close();
 	}
@@ -183,13 +207,13 @@ void CListBoxEx::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 	lpMeasureItemStruct->itemHeight = 48 + 4*2 + 8;
 }
 
-void CListBoxEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+void CListBoxEx::DrawItemData(LPDRAWITEMSTRUCT lpDrawItemStruct, CFileItem* pItem)
 {
 	auto pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 	pDC->SetBkMode(TRANSPARENT);
 
 	CRect rectItem(lpDrawItemStruct->rcItem);
-	rectItem.DeflateRect(4,4,4,4);
+	rectItem.DeflateRect(4, 4, 4, 4);
 	CRect rectIcon(rectItem.left, rectItem.top, rectItem.left + 48, rectItem.top + 48);
 	CRect rectIconTick(rectIcon.left, rectIcon.top + 48 - 16, rectIcon.left + 16, rectItem.top + 48);
 	CRect rectText(rectIcon.right, rectItem.top, rectItem.right - 8, rectItem.bottom);
@@ -207,8 +231,6 @@ void CListBoxEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CBrush brushText(textColour);
 	CBrush brushDescText(descTextColour);
 
-
-	FileItemStruct* pItem = static_cast<FileItemStruct*>(GetItemDataPtr(lpDrawItemStruct->itemID));
 
 	if (selected || redraw)
 	{
@@ -242,6 +264,15 @@ void CListBoxEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	}
 }
 
+void CListBoxEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
+	auto pData = GetItemDataPtr(lpDrawItemStruct->itemID);
+	if (pData != (void*)-1) {
+		this->DrawItemData(lpDrawItemStruct, reinterpret_cast<CFileItem*>(pData));
+	}
+
+}
+
 uint64_t FileSize(const wchar_t* name)
 {
 	struct __stat64 buf;
@@ -257,17 +288,13 @@ int CListBoxEx::AddItem(const CString& srcDir, const CString& filename)
 
 	auto fullPath(srcDir + _T("\\") + filename);
 	auto fSize = FileSize(fullPath);
-	if (fSize < MIN_FILE_SIZE)
-	{
-		return -1;
-	}
 
 	auto index = this->AddString(_T(""));
-	auto data = new FileItemStruct();
+	auto data = new CFileItem();
 	data->m_pDirectory = new CString(srcDir);
 	data->m_pFilename = new CString(filename);
 
-	SHFILEINFO shfi;
+	SHFILEINFO shfi = {};
 	SHGetFileInfo(fullPath, FILE_ATTRIBUTE_NORMAL, &shfi, sizeof(SHFILEINFO),
 		SHGFI_USEFILEATTRIBUTES | SHGFI_ICON | SHGFI_SHELLICONSIZE);
 
@@ -347,7 +374,6 @@ void CListBoxEx::PreSubclassWindow()
 	EnableToolTips(TRUE);
 }
 
-
 INT_PTR CListBoxEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	RECT itemRect;
@@ -383,8 +409,11 @@ BOOL CListBoxEx::OnToolTipText(UINT id, NMHDR * pNMHDR, LRESULT * pResult)
 
 	auto strW = static_cast<const TCHAR*>(str);
 	auto memSize = str.GetLength() * sizeof TCHAR + (2 * sizeof TCHAR);
-	auto lpszText = static_cast<TCHAR*>(malloc(memSize));
-	ZeroMemory(lpszText, memSize);
+	auto lpszText = (TCHAR*)calloc(memSize, 1);
+	if (!lpszText) {
+		return FALSE;
+	}
+
 	memcpy(lpszText, strW, memSize);
 
 	ptText->lpszText = lpszText;
@@ -393,4 +422,20 @@ BOOL CListBoxEx::OnToolTipText(UINT id, NMHDR * pNMHDR, LRESULT * pResult)
 
 	return TRUE;
 
+}
+
+void CListBoxEx::OnPaint()
+{
+	if (GetCount() == 0) {
+		CPaintDC dc(this);
+
+		CRect rect;
+		this->GetClientRect(rect);
+		dc.SetTextColor(m_descText);
+		dc.SelectObject(m_systemFont);
+		dc.DrawText(m_sPlaceholder, m_sPlaceholder.GetLength(), rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS);
+	}
+	else {
+		Default();
+	}
 }

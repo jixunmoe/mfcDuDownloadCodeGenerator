@@ -2,24 +2,25 @@
 #include <mutex>
 
 #include "FileItem.h"
-typedef CFileItem FileItemStruct, *LPFileItemStruct;
 
 // CListBoxEx
 
-enum ProcType
+enum class ProcType
 {
 	FILE_PROG,
 	INC_FILE,
 	ERR_FILE
 };
 
-typedef void(*f_proc_file_callback) (ProcType type, double progress, LPFileItemStruct, void* extra);
+typedef void(*f_proc_file_callback) (ProcType type, double progress, CFileItem* pItem, void* extra);
 class CListBoxEx : public CListBox
 {
 	DECLARE_DYNAMIC(CListBoxEx)
 private:
 	std::mutex mutex;
 	static HICON m_hIconTick;
+	static CString m_sPlaceholder;
+	static HFONT m_systemFont;
 	bool m_bStop = false;
 
 public:
@@ -43,13 +44,17 @@ public:
 	void ProcessFiles(f_proc_file_callback cb, void* extra);
 	void StopProcessing();
 
+	afx_msg void OnPaint();
 	virtual void MeasureItem(LPMEASUREITEMSTRUCT /*lpMeasureItemStruct*/);
 	virtual void DrawItem(LPDRAWITEMSTRUCT /*lpDrawItemStruct*/);
+	virtual void PreSubclassWindow();
+
+	void DrawItemData(LPDRAWITEMSTRUCT lpDrawItemStruct, CFileItem* pItem);
+
 	int AddItem(const CString& srcDir, const CString& filename);
 //	afx_msg void OnLbnSelchange();
 	void CopySelectedHashes();
 	int VKeyToItem(UINT /*nKey*/, UINT /*nIndex*/);
-	virtual void PreSubclassWindow();
 	virtual INT_PTR OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 	BOOL OnToolTipText(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
 };

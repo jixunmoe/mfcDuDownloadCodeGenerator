@@ -77,6 +77,15 @@ void CProgressText::Increase()
 	this->UpdateText();
 }
 
+void CProgressText::Reset()
+{
+	this->current = 0;
+	this->max = 0;
+	this->SetPos(0);
+	this->UpdateText();
+	this->RedrawWindow();
+}
+
 void CProgressText::UpdateText() {
 	if (this->max == 0) {
 		this->percent = 0;

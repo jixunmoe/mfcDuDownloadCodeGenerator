@@ -23,8 +23,8 @@ public:
 	CAppDlg(CWnd* pParent = NULL);	// standard constructor
 	void AddFile(const CString& srcDir, const CString& filename);
 	void ProcessFiles();
-	void AddHashEntry(LPFileItemStruct lp_item);
-	void ProcFile(ProcType proc, double progress, LPFileItemStruct lp_item);
+	void AddHashEntry(CFileItem* lp_item);
+	void ProcFile(ProcType proc, double progress, CFileItem* lp_item);
 	void RealExit();
 	std::vector<CString*> files;
 
@@ -50,25 +50,6 @@ protected:
 public:
 	afx_msg void OnBnClickedGenerate();
 	// Current file Progress
-	CToolTipCtrl m_dragTip;
-	BOOL PreTranslateMessage(MSG* pMsg)
-	{
-		if (pMsg->message == WM_MOUSEMOVE)
-			m_dragTip.RelayEvent(pMsg);
-		// ÏìÓ¦Ctrl+A
-		CEdit* pEdit = (CEdit*)GetDlgItem(IDC_EDIT_OUTPUT);
-		if (pMsg->message == WM_KEYDOWN &&
-			pMsg->hwnd == pEdit->GetSafeHwnd())
-		{
-			if ((GetKeyState(VK_CONTROL) & 0x8000) && pMsg->wParam == 'A')
-			{
-				CString buf;
-				GetDlgItemText(IDC_EDIT_OUTPUT, buf);
-				pEdit->SetSel(0, buf.GetLength());
-			}
-		}
-		return CDialog::PreTranslateMessage(pMsg);
-	}
 	CProgressCtrl m_progFile;
 	CProgressText m_progAll;
 	CListBoxEx m_listFiles;
