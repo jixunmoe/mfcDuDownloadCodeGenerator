@@ -69,4 +69,20 @@ public:
 	CButton m_btnClear;
 	CButton m_btnCopy;
 	CButton m_btnGenerate;
+	BOOL PreTranslateMessage(MSG* pMsg)
+	{
+		CEdit* pEdit = (CEdit*)GetDlgItem(IDC_EDIT_OUTPUT);
+		if (pMsg->message == WM_KEYDOWN &&
+			pMsg->hwnd == pEdit->GetSafeHwnd())
+		{
+			// ÏìÓ¦Ctrl+A
+			if ((GetKeyState(VK_CONTROL) & 0x8000) && pMsg->wParam == 'A')
+			{
+				CString buf;
+				GetDlgItemText(IDC_EDIT_OUTPUT, buf);
+				pEdit->SetSel(0, buf.GetLength());
+			}
+		}
+		return CDialogEx::PreTranslateMessage(pMsg);
+	}
 };
