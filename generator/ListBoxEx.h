@@ -52,7 +52,6 @@ public:
 	void DrawItemData(LPDRAWITEMSTRUCT lpDrawItemStruct, CFileItem* pItem);
 
 	int AddItem(const CString& srcDir, const CString& filename);
-//	afx_msg void OnLbnSelchange();
 	void CopySelectedHashes();
 	int VKeyToItem(UINT /*nKey*/, UINT /*nIndex*/);
 	virtual INT_PTR OnToolHitTest(CPoint point, TOOLINFO* pTI) const;

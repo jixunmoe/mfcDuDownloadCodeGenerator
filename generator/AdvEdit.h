@@ -13,9 +13,13 @@ public:
 	CAdvEdit();
 	virtual ~CAdvEdit();
 	void Append(const CString &text);
+	void SelectAll();
+	void InitEvents();
 
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnHotKey(UINT nHotKeyId, UINT nKey1, UINT nKey2);
 };
 
 
