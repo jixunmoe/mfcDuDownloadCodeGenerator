@@ -76,6 +76,9 @@ void CAppDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BTN_GENERATE, m_btnGenerate);
 }
 
+// NM_CLICK = -2
+constexpr UINT NM_CLICK_WITHOUT_WARNING = UINT(-2);
+
 BEGIN_MESSAGE_MAP(CAppDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
@@ -85,7 +88,7 @@ BEGIN_MESSAGE_MAP(CAppDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_ADD_FILE, &CAppDlg::OnClickedBtnAddFile)
 	ON_BN_CLICKED(IDC_BTN_CLEAR, &CAppDlg::OnBnClickedBtnClear)
 	ON_WM_DROPFILES()
-	ON_NOTIFY(NM_CLICK, IDC_SYSLINK_BLOG, &CAppDlg::OnClickSyslinkBlog)
+	ON_NOTIFY(NM_CLICK_WITHOUT_WARNING, IDC_SYSLINK_BLOG, &CAppDlg::OnClickSyslinkBlog)
 	ON_BN_CLICKED(IDC_BTN_COPY, &CAppDlg::OnBnClickedBtnCopy)
 END_MESSAGE_MAP()
 
@@ -95,6 +98,8 @@ END_MESSAGE_MAP()
 BOOL CAppDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+
+	AppendVersionNumber();
 
 	// Set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
@@ -115,15 +120,25 @@ BOOL CAppDlg::OnInitDialog()
 		reg.Close();
 	}
 
-	m_ofn_file_title.LoadString(IDS_PICK_FILE);
-	m_ofn_dir_title.LoadString(IDS_PICK_DIR);
+	std::ignore = m_ofn_file_title.LoadString(IDS_PICK_FILE);
+	std::ignore = m_ofn_dir_title.LoadString(IDS_PICK_DIR);
 
 	m_progFile.SetRange(0, 10000);
 
 	// 初始化目录选择
-	CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+	std::ignore = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
 	m_editOutput.InitEvents();
+	m_editOutput.SetLimitText(0);
+
+
+#if _DEBUG
+	{
+		char buffer[32];
+		sprintf_s(buffer, sizeof(buffer), "text limit: 0x%08x\n", m_editOutput.GetLimitText());
+		OutputDebugStringA(buffer);
+	}
+#endif
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -291,6 +306,45 @@ void CAppDlg::RealExit()
 	// TODO: Clean up.
 
 	CDialogEx::OnCancel();
+}
+
+void CAppDlg::AppendVersionNumber()
+{
+	CString csEntry;
+	HMODULE hLib = AfxGetResourceHandle();
+
+	HRSRC hVersion = FindResource(hLib, MAKEINTRESOURCE(VS_VERSION_INFO), RT_VERSION);
+	if (hVersion == nullptr) return;
+
+	HGLOBAL hGlobal = LoadResource(hLib, hVersion);
+	if (hGlobal == nullptr) {
+		FreeResource(hVersion);
+		return;
+	}
+
+	LPVOID versionInfo = LockResource(hGlobal);
+	if (versionInfo == nullptr) {
+		UnlockResource(hGlobal);
+		FreeResource(hVersion);
+		return;
+	}
+
+	LPVOID lpBuffer = nullptr;
+	UINT dwBytes = 0;
+
+	if (VerQueryValueW(versionInfo, L"\\StringFileInfo\\080004B0\\FileVersion", &lpBuffer, &dwBytes)) {
+		CString strTitle;
+		GetWindowText(strTitle);
+
+		strTitle += _T(" (v");
+		strTitle += (TCHAR*)lpBuffer;
+		strTitle += _T(")");
+		SetWindowText(strTitle);
+	}
+
+	UnlockResource(hGlobal);
+	FreeResource(hVersion);
+
 }
 
 DWORD WINAPI _thread_stop_process(void* param)

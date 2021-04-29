@@ -26,6 +26,7 @@ public:
 	void AddHashEntry(CFileItem* lp_item);
 	void ProcFile(ProcType proc, double progress, CFileItem* lp_item);
 	void RealExit();
+	void AppendVersionNumber();
 	std::vector<CString*> files;
 
 // Dialog Data

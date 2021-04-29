@@ -37,6 +37,9 @@ wchar_t* base64_encode(const unsigned char* src, size_t len)
         return nullptr;
 
     wchar_t* out = (wchar_t*)calloc(olen + 1, sizeof(wchar_t));
+    if (out == nullptr) {
+        return nullptr;
+    }
 
     end = src + len;
     in = src;
