@@ -128,7 +128,6 @@ BOOL CAppDlg::OnInitDialog()
 	// 初始化目录选择
 	std::ignore = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
-	m_editOutput.InitEvents();
 	m_editOutput.SetLimitText(0);
 
 

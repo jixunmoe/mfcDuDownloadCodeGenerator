@@ -4,8 +4,6 @@
 #include "stdafx.h"
 #include "AdvEdit.h"
 
-#define SELECT_ALL_KEY_ID (10001)
-
 // CAdvEdit
 
 IMPLEMENT_DYNAMIC(CAdvEdit, CEdit)
@@ -32,26 +30,23 @@ void CAdvEdit::SelectAll()
 	SetSel(0, GetWindowTextLength(), FALSE);
 }
 
-void CAdvEdit::InitEvents()
-{
-	RegisterHotKey(GetSafeHwnd(), SELECT_ALL_KEY_ID, MOD_CONTROL, 'A');
-}
-
 BEGIN_MESSAGE_MAP(CAdvEdit, CEdit)
-	ON_WM_HOTKEY()
+	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
-
-
-// CAdvEdit message handlers
-
-
-
-void CAdvEdit::OnHotKey(UINT nHotKeyId, UINT nKey1, UINT nKey2)
+void CAdvEdit::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	CEdit::OnHotKey(nHotKeyId, nKey1, nKey2);
+	CEdit::OnKeyDown(nChar, nRepCnt, nFlags);
 
-	if (nHotKeyId == SELECT_ALL_KEY_ID) {
-		this->SelectAll();
+	if (nChar == 'A') {
+		BYTE keyState[256] = { 0 };
+		GetKeyboardState(keyState);
+		bool useControl = (keyState[VK_CONTROL] & 0x80) != 0;
+		bool useShift = (keyState[VK_SHIFT] & 0x80) != 0;
+		bool useAlt = (keyState[VK_MENU] & 0x80) != 0;
+
+		if (useControl && !useShift && !useAlt) {
+			this->SelectAll();
+		}
 	}
 }
