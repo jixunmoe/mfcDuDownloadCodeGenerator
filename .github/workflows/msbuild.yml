@@ -29,6 +29,9 @@ jobs:
     - name: 🏭 prepare MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
 
+    - name: 🏭 prepare msys2
+      uses: msys2/setup-msys2@v2
+
     - name: 🔧 build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
@@ -42,7 +45,7 @@ jobs:
         path: x64/Release/*.exe
 
     - name: 📦 package for release
-      shell: msys2bash
+      shell: msys2 {0}
       run: |
         cd x64/Release
         zip -9 "../../ducode.${{ github.ref_name }}.zip" *.exe
