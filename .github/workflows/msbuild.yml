@@ -8,7 +8,7 @@ on:
 
 env:
   # Path to the solution file relative to the root of the project.
-  SOLUTION_FILE_PATH: vs2019
+  SOLUTION_FILE_PATH: mfcDuDownloadCodeGenerator_vs2019.sln
 
   # Configuration type to build.
   # You can convert this to a build matrix if you need coverage of multiple configuration types.
@@ -39,13 +39,13 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: vs2019/x64/Release/*.exe
+        path: x64/Release/*.exe
 
     - name: 📦 package for release
       shell: bash
       run: |
-        cd vs2019/x64/Release
-        7za a "../../../ducode.${{ github.ref_name }}.zip" *.exe
+        cd x64/Release
+        7za a "../../ducode.${{ github.ref_name }}.zip" *.exe
 
     - name: 📝 draft release
       if: startsWith(github.ref, 'refs/tags/v')
