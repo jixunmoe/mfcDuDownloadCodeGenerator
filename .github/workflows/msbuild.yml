@@ -25,11 +25,11 @@ jobs:
           - build_config: vs2019_ci_dynamic
             os: windows-2019
             vs_version: vs2019
-            upx: false
+            upx: 'false'
           - build_config: vs2022_ci_static
             os: windows-2022
             vs_version: vs2022
-            upx: true
+            upx: 'true'
 
     runs-on: "${{ matrix.os }}"
 
@@ -59,11 +59,11 @@ jobs:
           ${{env.SOLUTION_FILE_PATH}}
 
     - name: 🗜️ upx?
-      if: |
-        ${{ matrix.upx }} == 'true'
       shell: msys2 {0}
       run: |
-        upx -9 x64/${{ matrix.build_config }}/*.exe
+        if [ "${{ matrix.upx }}" == "true" ]; then
+          upx -9 x64/${{ matrix.build_config }}/*.exe
+        fi
 
     - name: 🗜️ archive binaries
       uses: actions/upload-artifact@v3
