@@ -30,7 +30,7 @@ jobs:
             upx: 'false'
           - build_config: vs2019_ci_static_xp
             os: windows-2019
-            platform: Win32
+            platform: x86
             vs_version: vs2019_xp
             upx: 'true'
           - build_config: vs2022_ci_static
