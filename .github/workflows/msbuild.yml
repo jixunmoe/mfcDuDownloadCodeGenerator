@@ -20,7 +20,27 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-2019
+    strategy:
+      matrix:
+        build_config:
+          - vs2019_dynamic
+          - vs2022_static
+
+        include:
+          - build_config: vs2019_dynamic
+            os: windows-2019
+            runtime_library: MultiThreadedDLL
+            mfc: Dynamic
+            platform: v142
+            upx: false
+          - build_config: vs2022_static
+            os: windows-2022
+            runtime_library: MultiThreaded
+            mfc: Static
+            platform: v143
+            upx: true
+
+    runs-on: "${{ matrix.os }}"
 
     steps:
     - name: 🛎️ checkout
@@ -35,13 +55,27 @@ jobs:
         update: true
         install: >-
           git
+          upx
           zip
 
     - name: 🔧 build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:PlatformToolset=v142 /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+      run: |
+        msbuild /m `
+          /p:PlatformToolset=v142 `
+          /p:RuntimeLibrary=${{ matrix.runtime_library }} `
+          /p:UseOfMfc=${{ matrix.mfc }} `
+          /p:Configuration=${{env.BUILD_CONFIGURATION}} `
+          ${{env.SOLUTION_FILE_PATH}}
+
+    - name: 🗜️ upx?
+      if: |
+        ${{ matrix.upx }} == 'true'
+      shell: msys2 {0}
+      run: |
+        upx -9 x64/Release/*.exe
 
     - name: 🗜️ archive binaries
       uses: actions/upload-artifact@v3
