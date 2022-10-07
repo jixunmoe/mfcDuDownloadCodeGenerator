@@ -7,8 +7,6 @@
 #include <fstream>      // std::ifstream
 #include "Hasher.h"
 #include <debugapi.h>
-#include <winuser.h>
-#include <minwinbase.h>
 #include "utils.h"
 
 #define BD_FILE_HEADER_SIZE (256 * 1024)

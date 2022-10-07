@@ -56,7 +56,12 @@
 #endif
 
 #include <vector>
+
+#if _MSC_VER < 1920
+#include <Windows.h>
+#else
 #include <minwinbase.h>
+#endif
 #include "afxcmn.h"
 #include "afxwin.h"
 
