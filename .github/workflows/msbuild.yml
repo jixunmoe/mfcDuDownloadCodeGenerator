@@ -31,6 +31,10 @@ jobs:
 
     - name: 🏭 prepare msys2
       uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          zip
 
     - name: 🔧 build
       working-directory: ${{env.GITHUB_WORKSPACE}}
