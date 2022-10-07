@@ -69,7 +69,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: x64/${{ matrix.build_config }}/*.exe
+        path: x64/${{ matrix.build_config }}
 
     - name: 📦 package for release
       shell: msys2 {0}
