@@ -19,14 +19,22 @@ jobs:
       matrix:
         build_config:
           - vs2019_ci_dynamic
+          - vs2019_ci_static_xp
           - vs2022_ci_static
 
         include:
           - build_config: vs2019_ci_dynamic
             os: windows-2019
+            platform: x64
             vs_version: vs2019
             upx: 'false'
+          - build_config: vs2019_ci_static_xp
+            os: windows-2019
+            platform: Win32
+            vs_version: vs2019_xp
+            upx: 'true'
           - build_config: vs2022_ci_static
+            platform: x64
             os: windows-2022
             vs_version: vs2022
             upx: 'true'
@@ -56,25 +64,26 @@ jobs:
       run: |
         msbuild /m `
           /p:Configuration=${{ matrix.build_config }} `
+          /p:Platform=${{ matrix.build_config }} `
           ${{env.SOLUTION_FILE_PATH}}
 
     - name: 🗜️ upx?
       shell: msys2 {0}
       run: |
         if [ "${{ matrix.upx }}" == "true" ]; then
-          upx -9 x64/${{ matrix.build_config }}/*.exe
+          upx -9 ${{ matrix.platform }}/${{ matrix.build_config }}/*.exe
         fi
 
     - name: 🗜️ archive binaries
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: x64/${{ matrix.build_config }}
+        path: ${{ matrix.platform }}/${{ matrix.build_config }}
 
     - name: 📦 package for release
       shell: msys2 {0}
       run: |
-        cd "x64/${{ matrix.build_config }}"
+        cd "${{ matrix.platform }}/${{ matrix.build_config }}"
         zip -9 "../../ducode.${{ matrix.vs_version }}.$(git describe --abbrev=0).zip" *.exe
 
     - name: 📝 draft release
