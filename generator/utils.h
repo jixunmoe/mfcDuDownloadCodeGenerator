@@ -1,5 +1,4 @@
 #pragma once
-#include <debugapi.h>
 
 std::vector<CString*> OpenFileDialog(CString &title, HWND hWnd);
 std::vector<CString*> OpenDirectoryDialog(CString &title, HWND hWnd);
