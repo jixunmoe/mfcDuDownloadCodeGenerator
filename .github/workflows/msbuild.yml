@@ -29,12 +29,14 @@ jobs:
         include:
           - build_config: vs2019_dynamic
             os: windows-2019
+            compiler: vs2019
             runtime_library: MultiThreadedDLL
             mfc: Dynamic
             platform: v142
             upx: false
           - build_config: vs2022_static
             os: windows-2022
+            compiler: vs2022 
             runtime_library: MultiThreaded
             mfc: Static
             platform: v143
@@ -64,7 +66,7 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: |
         msbuild /m `
-          /p:PlatformToolset=v142 `
+          /p:PlatformToolset=${{ matrix.platform }} `
           /p:RuntimeLibrary=${{ matrix.runtime_library }} `
           /p:UseOfMfc=${{ matrix.mfc }} `
           /p:Configuration=${{env.BUILD_CONFIGURATION}} `
