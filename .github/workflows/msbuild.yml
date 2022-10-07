@@ -38,4 +38,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ducode
-        path: x64/Release
+        path: vs2019/x64/Release/*.exe
