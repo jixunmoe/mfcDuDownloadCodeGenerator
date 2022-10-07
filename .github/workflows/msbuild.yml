@@ -8,7 +8,7 @@ on:
 
 env:
   # Path to the solution file relative to the root of the project.
-  SOLUTION_FILE_PATH: .\vs2019
+  SOLUTION_FILE_PATH: vs2019
 
   # Configuration type to build.
   # You can convert this to a build matrix if you need coverage of multiple configuration types.
@@ -23,19 +23,40 @@ jobs:
     runs-on: windows-2019
 
     steps:
-    - uses: actions/checkout@v3
+    - name: 🛎️ checkout
+      uses: actions/checkout@v3
 
-    - name: Add MSBuild to PATH
+    - name: 🏭 prepare MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Build
+    - name: 🔧 build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
 
-    - name: archive bin
+    - name: 🗜️ archive binaries
       uses: actions/upload-artifact@v3
       with:
-        name: ducode
+        name: binaries
         path: vs2019/x64/Release/*.exe
+
+    - name: 📦 package for release
+      shell: bash
+      run: |
+        cd vs2019/x64/Release
+        zip -9 ../../../ducode.${{ github.ref_name }}.zip *.exe
+
+    - name: 📝 draft release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        body: "<to be filled>"
+        draft: true
+        # note you'll typically need to create a personal access token
+        # with permissions to create releases in the other repo
+        token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+        files: |
+          *.zip
