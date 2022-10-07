@@ -64,7 +64,7 @@ jobs:
       run: |
         msbuild /m `
           /p:Configuration=${{ matrix.build_config }} `
-          /p:Platform=${{ matrix.build_config }} `
+          /p:Platform=${{ matrix.platform }} `
           ${{env.SOLUTION_FILE_PATH}}
 
     - name: 🗜️ upx?
