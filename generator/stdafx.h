@@ -61,6 +61,7 @@
 #include <Windows.h>
 #else
 #include <minwinbase.h>
+#include <fileapi.h>
 #endif
 #include "afxcmn.h"
 #include "afxwin.h"

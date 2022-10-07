@@ -7,7 +7,6 @@
 #include "appDlg.h"
 #include "afxdialogex.h"
 #include "utils.h"
-#include <fileapi.h>
 #include "base64.h"
 
 #ifdef _DEBUG
