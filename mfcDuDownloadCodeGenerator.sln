@@ -11,8 +11,8 @@ Global
 		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-		vs2019_ci_dynamic_xp|x64 = vs2019_ci_dynamic_xp|x64
-		vs2019_ci_dynamic_xp|x86 = vs2019_ci_dynamic_xp|x86
+		vs2019_ci_static_xp|x64 = vs2019_ci_static_xp|x64
+		vs2019_ci_static_xp|x86 = vs2019_ci_static_xp|x86
 		vs2019_ci_dynamic|x64 = vs2019_ci_dynamic|x64
 		vs2019_ci_dynamic|x86 = vs2019_ci_dynamic|x86
 		vs2022_ci_static|x64 = vs2022_ci_static|x64
@@ -27,10 +27,10 @@ Global
 		{52BE8E83-C47E-469F-92B7-F078C51C0EBD}.Release|x64.Build.0 = Release|x64
 		{52BE8E83-C47E-469F-92B7-F078C51C0EBD}.Release|x86.ActiveCfg = Release|Win32
 		{52BE8E83-C47E-469F-92B7-F078C51C0EBD}.Release|x86.Build.0 = Release|Win32
-		{52BE8E83-C47E-469F-92B7-F078C51C0EBD}.vs2019_ci_dynamic_xp|x64.ActiveCfg = vs2019_ci_dynamic_xp|x64
-		{52BE8E83-C47E-469F-92B7-F078C51C0EBD}.vs2019_ci_dynamic_xp|x64.Build.0 = vs2019_ci_dynamic_xp|x64
-		{52BE8E83-C47E-469F-92B7-F078C51C0EBD}.vs2019_ci_dynamic_xp|x86.ActiveCfg = vs2019_ci_dynamic_xp|Win32
-		{52BE8E83-C47E-469F-92B7-F078C51C0EBD}.vs2019_ci_dynamic_xp|x86.Build.0 = vs2019_ci_dynamic_xp|Win32
+		{52BE8E83-C47E-469F-92B7-F078C51C0EBD}.vs2019_ci_static_xp|x64.ActiveCfg = vs2019_ci_static_xp|x64
+		{52BE8E83-C47E-469F-92B7-F078C51C0EBD}.vs2019_ci_static_xp|x64.Build.0 = vs2019_ci_static_xp|x64
+		{52BE8E83-C47E-469F-92B7-F078C51C0EBD}.vs2019_ci_static_xp|x86.ActiveCfg = vs2019_ci_static_xp|Win32
+		{52BE8E83-C47E-469F-92B7-F078C51C0EBD}.vs2019_ci_static_xp|x86.Build.0 = vs2019_ci_static_xp|Win32
 		{52BE8E83-C47E-469F-92B7-F078C51C0EBD}.vs2019_ci_dynamic|x64.ActiveCfg = vs2019_ci_dynamic|x64
 		{52BE8E83-C47E-469F-92B7-F078C51C0EBD}.vs2019_ci_dynamic|x64.Build.0 = vs2019_ci_dynamic|x64
 		{52BE8E83-C47E-469F-92B7-F078C51C0EBD}.vs2019_ci_dynamic|x86.ActiveCfg = vs2019_ci_dynamic|Win32
