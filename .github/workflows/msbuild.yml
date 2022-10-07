@@ -23,23 +23,17 @@ jobs:
     strategy:
       matrix:
         build_config:
-          - vs2019_dynamic
-          - vs2022_static
+          - vs2019_ci_dynamic
+          - vs2022_ci_static
 
         include:
-          - build_config: vs2019_dynamic
+          - build_config: vs2019_ci_dynamic
             os: windows-2019
-            compiler: vs2019
-            runtime_library: MultiThreadedDLL
-            mfc: Dynamic
-            platform: v142
+            vs_version: vs2019
             upx: false
-          - build_config: vs2022_static
+          - build_config: vs2022_ci_static
             os: windows-2022
-            compiler: vs2022 
-            runtime_library: MultiThreaded
-            mfc: Static
-            platform: v143
+            vs_version: vs2022
             upx: true
 
     runs-on: "${{ matrix.os }}"
@@ -66,10 +60,7 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: |
         msbuild /m `
-          /p:PlatformToolset=${{ matrix.platform }} `
-          /p:RuntimeLibrary=${{ matrix.runtime_library }} `
-          /p:UseOfMfc=${{ matrix.mfc }} `
-          /p:Configuration=${{env.BUILD_CONFIGURATION}} `
+          /p:Configuration=${{ matrix.build_config }} `
           ${{env.SOLUTION_FILE_PATH}}
 
     - name: 🗜️ upx?
@@ -77,19 +68,19 @@ jobs:
         ${{ matrix.upx }} == 'true'
       shell: msys2 {0}
       run: |
-        upx -9 x64/Release/*.exe
+        upx -9 x64/${{ matrix.build_config }}/*.exe
 
     - name: 🗜️ archive binaries
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: x64/Release/*.exe
+        path: x64/${{ matrix.build_config }}/*.exe
 
     - name: 📦 package for release
       shell: msys2 {0}
       run: |
-        cd x64/Release
-        zip -9 "../../ducode.$(git describe --abbrev=0).zip" *.exe
+        cd "x64/${{ matrix.build_config }}"
+        zip -9 "../../ducode.${{ matrix.vs_version }}.$(git describe --abbrev=0).zip" *.exe
 
     - name: 📝 draft release
       if: startsWith(github.ref, 'refs/tags/v')
