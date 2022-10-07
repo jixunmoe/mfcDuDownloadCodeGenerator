@@ -34,6 +34,7 @@ jobs:
       with:
         update: true
         install: >-
+          git
           zip
 
     - name: 🔧 build
@@ -52,7 +53,7 @@ jobs:
       shell: msys2 {0}
       run: |
         cd x64/Release
-        zip -9 "../../ducode.${{ github.ref_name }}.zip" *.exe
+        zip -9 "../../ducode.$(git describe --abbrev=0).zip" *.exe
 
     - name: 📝 draft release
       if: startsWith(github.ref, 'refs/tags/v')
