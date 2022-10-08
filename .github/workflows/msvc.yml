@@ -57,6 +57,8 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: |
+        Set-PSDebug -Trace 1
+
         $config = "${{ matrix.build_config }}"
         if ($config.Contains(".static.")) {
           $env:_CL_ += ' /MT'
@@ -85,6 +87,8 @@ jobs:
     - name: 🗜️ rename + optional upx
       shell: msys2 {0}
       run: |
+        set -ex
+
         cd "build"
         if [[ "${{ matrix.build_config }}" =~ ".static." ]]; then
           upx -9 *.exe
@@ -100,6 +104,8 @@ jobs:
     - name: 📦 package for release
       shell: msys2 {0}
       run: |
+        set -ex
+
         cd "build"
         GIT_VERSION="$(git describe --abbrev=0)"
         ZIP_NAME="ducode.${{ matrix.build_config }}.${GIT_VERSION}.zip"
