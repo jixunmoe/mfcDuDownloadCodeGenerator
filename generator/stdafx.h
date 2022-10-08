@@ -56,7 +56,15 @@
 #endif
 
 #include <vector>
+
+#if _MSC_VER < 1930
+// less than vs2022, use the full Windows.h header
+#include <Windows.h>
+#else
+// Other: use a subset of the headers.
 #include <minwinbase.h>
+#include <fileapi.h>
+#endif
 #include "afxcmn.h"
 #include "afxwin.h"
 

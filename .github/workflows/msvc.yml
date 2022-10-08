@@ -1,0 +1,127 @@
+name: MSBuild
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: mfcDuDownloadCodeGenerator.sln
+  BUILD_CONFIGURATION: Release
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        build_config:
+          - vs2019.x86_64
+          - vs2019.static.xp.x86
+          - vs2022.x86_64
+          - vs2022.static.x86_64
+
+        include:
+          - build_config: vs2019.x86_64
+            os: windows-2019
+          - build_config: vs2019.static.xp.x86
+            os: windows-2019
+          - build_config: vs2022.x86_64
+            os: windows-2022
+          - build_config: vs2022.static.x86_64
+            os: windows-2022
+
+    runs-on: "${{ matrix.os }}"
+
+    steps:
+    - name: 🛎️ checkout
+      uses: actions/checkout@v3
+
+    - name: 🏭 prepare MSBuild
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: 🏭 prepare msys2
+      uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          git
+          upx
+          zip
+
+    - name: 🔧 build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: |
+        Set-PSDebug -Trace 1
+
+        $config = "${{ matrix.build_config }}"
+        if ($config.Contains(".static.")) {
+          $env:_CL_ += ' /MT'
+          $mfc_type = 'Static'
+        } else {
+          $env:_CL_ += ' /MD'
+          $mfc_type = 'Dynamic'
+        }
+
+        $platform = if ($config.EndsWith('x86_64')) { "x64" } else { "x86" }
+        $toolset = if ($config.StartsWith('vs2022.')) { "v143" }
+          elseif ($config.Contains('.xp.')) { "v141_xp" }
+          else { "v142" }
+
+        msbuild /m `
+          /p:Configuration=${{ env.BUILD_CONFIGURATION }} `
+          /p:Platform=$platform `
+          /p:PlatformToolset=$toolset `
+          /p:UseOfMfc=$mfc_type `
+          ${{env.SOLUTION_FILE_PATH}}
+        
+        New-Item -ItemType Directory build
+        Move-Item -Path ".\$platform\${{ env.BUILD_CONFIGURATION }}\*.exe" `
+          -Destination ".\build\"
+
+    - name: 🗜️ rename + optional upx
+      shell: msys2 {0}
+      run: |
+        set -ex
+
+        cd "build"
+        if [[ "${{ matrix.build_config }}" =~ ".static." ]]; then
+          upx -9 *.exe
+        fi
+        cp "ducode.exe" "ducode.${{ matrix.build_config }}.exe"
+
+    - name: 🗜️ archive binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: binaries
+        path: build/ducode.${{ matrix.build_config }}.exe
+
+    - name: 📦 package for release
+      if: startsWith(github.ref, 'refs/tags/v')
+      shell: msys2 {0}
+      run: |
+        set -ex
+
+        cd "build"
+        GIT_VERSION="$(git describe --abbrev=0)"
+        ZIP_NAME="ducode.${{ matrix.build_config }}.${GIT_VERSION}.zip"
+        zip -9 "../${ZIP_NAME}" "ducode.exe"
+
+    - name: 📝 draft release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        body: "<to be filled>"
+        draft: true
+        # note you'll typically need to create a personal access token
+        # with permissions to create releases in the other repo
+        token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+        files: |
+          *.zip
