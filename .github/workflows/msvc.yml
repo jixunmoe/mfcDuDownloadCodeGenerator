@@ -38,6 +38,8 @@ jobs:
     steps:
     - name: 🛎️ checkout
       uses: actions/checkout@v3
+      with:
+        fetch-depth: "${{ 0 if startsWith(github.ref, 'refs/tags/v') else 1 }}"
 
     - name: 🏭 prepare MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
