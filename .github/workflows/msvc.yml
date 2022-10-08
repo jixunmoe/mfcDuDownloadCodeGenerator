@@ -38,8 +38,6 @@ jobs:
     steps:
     - name: 🛎️ checkout
       uses: actions/checkout@v3
-      with:
-        fetch-depth: "${{ 0 if startsWith(github.ref, 'refs/tags/v') else 1 }}"
 
     - name: 🏭 prepare MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
@@ -109,7 +107,8 @@ jobs:
         set -ex
 
         cd "build"
-        GIT_VERSION="$(git describe --abbrev=0)"
+        GIT_VERSION="${{github.ref}}"
+        GIT_VERSION="${GIT_VERSION:10}"
         ZIP_NAME="ducode.${{ matrix.build_config }}.${GIT_VERSION}.zip"
         zip -9 "../${ZIP_NAME}" "ducode.exe"
 
