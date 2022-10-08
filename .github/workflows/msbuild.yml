@@ -78,23 +78,26 @@ jobs:
           /p:UseOfMfc=$MFC_VER `
           ${{env.SOLUTION_FILE_PATH}}
 
-    - name: 🗜️ upx?
+    - name: 🗜️ rename + optional upx
       shell: msys2 {0}
-      if: |
-        "${{ matrix.static }}" == "true"
       run: |
-        upx -9 ${{ matrix.platform }}/${{ matrix.build_config }}/*.exe
+        cd "${{ matrix.platform }}/${{ env.BUILD_CONFIGURATION }}"
+        mv ducode.exe "ducode.${{ matrix.suffix }}.exe"
+
+        if [ "${{ matrix.static }}" == "true" ]; then
+          upx -9 *.exe
+        fi
 
     - name: 🗜️ archive binaries
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: ${{ matrix.platform }}/${{ matrix.build_config }}
+        path: ${{ matrix.platform }}/${{ env.BUILD_CONFIGURATION }}/*.exe
 
     - name: 📦 package for release
       shell: msys2 {0}
       run: |
-        cd "${{ matrix.platform }}/${{ matrix.build_config }}"
+        cd "${{ matrix.platform }}/${{ env.BUILD_CONFIGURATION }}"
         zip -9 "../../ducode.${{ matrix.vs_version }}.$(git describe --abbrev=0).zip" *.exe
 
     - name: 📝 draft release
