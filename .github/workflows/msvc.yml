@@ -35,6 +35,9 @@ jobs:
 
     runs-on: "${{ matrix.os }}"
 
+    permissions:
+      contents: write
+
     steps:
     - name: 🛎️ checkout
       uses: actions/checkout@v3
@@ -125,6 +128,3 @@ jobs:
         token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
         files: |
           *.zip
-
-permissions:
-  contents: write
