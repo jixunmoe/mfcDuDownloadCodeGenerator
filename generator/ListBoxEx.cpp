@@ -272,11 +272,21 @@ void CListBoxEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 uint64_t FileSize(const wchar_t* name)
 {
-	struct __stat64 buf;
-	if (_wstat64(name, &buf) != 0)
-		return 0; // error, could use errno to find out more
+	auto hFile = CreateFileW(
+		name, GENERIC_READ, FILE_SHARE_READ, nullptr, 
+		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr
+	);
+	if (hFile == INVALID_HANDLE_VALUE) {
+		return 0; // could not open file
+	}
+	LARGE_INTEGER fs_large = {0};
+	if (!GetFileSizeEx(hFile, &fs_large)) {
+		// get file size failed
+		fs_large.QuadPart = 0;
+	}
+	CloseHandle(hFile);
 
-	return buf.st_size;
+	return static_cast<uint64_t>(fs_large.QuadPart);
 }
 
 int CListBoxEx::AddItem(const CString& srcDir, const CString& filename)
