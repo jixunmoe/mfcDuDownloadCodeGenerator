@@ -21,6 +21,7 @@ jobs:
         build_config:
           - vs2019_ci_dynamic
           - vs2019_ci_static_xp
+          - vs2022_ci_dynamic
           - vs2022_ci_static
 
         include:
@@ -41,6 +42,11 @@ jobs:
             toolset: v143
             static: 'true'
             suffix: 'vs2022.static'
+          - build_config: vs2022_ci_dynamic
+            os: windows-2022
+            platform: x64
+            toolset: v143
+            suffix: 'vs2022'
 
     runs-on: "${{ matrix.os }}"
 
