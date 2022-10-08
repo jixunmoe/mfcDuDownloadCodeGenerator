@@ -9,6 +9,7 @@ on:
 env:
   # Path to the solution file relative to the root of the project.
   SOLUTION_FILE_PATH: mfcDuDownloadCodeGenerator.sln
+  BUILD_CONFIGURATION: Release
 
 permissions:
   contents: read
@@ -26,18 +27,19 @@ jobs:
           - build_config: vs2019_ci_dynamic
             os: windows-2019
             platform: x64
-            vs_version: vs2019
-            upx: 'false'
+            toolset: v142
+            suffix: 'vs2019'
           - build_config: vs2019_ci_static_xp
             os: windows-2019
             platform: x86
-            vs_version: vs2019_xp
-            upx: 'true'
+            toolset: v141_xp
+            suffix: 'vs2019.xp.x86'
+            static: 'true'
           - build_config: vs2022_ci_static
-            platform: x64
             os: windows-2022
-            vs_version: vs2022
-            upx: 'true'
+            platform: x64
+            toolset: v143
+            suffix: 'vs2022.static'
 
     runs-on: "${{ matrix.os }}"
 
@@ -62,17 +64,26 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: |
+        if ("${{ matrix.static }}" -eq "true") {
+          $env:_CL_ += ' /MT'
+          $MFC_VER = 'Static'
+        } else {
+          $env:_CL_ += ' /MD'
+          $MFC_VER = 'Dynamic'
+        }
         msbuild /m `
-          /p:Configuration=${{ matrix.build_config }} `
+          /p:Configuration=${{ env.BUILD_CONFIGURATION }} `
           /p:Platform=${{ matrix.platform }} `
+          /p:PlatformToolset=${{ matrix.toolset }} `
+          /p:UseOfMfc=$MFC_VER `
           ${{env.SOLUTION_FILE_PATH}}
 
     - name: 🗜️ upx?
       shell: msys2 {0}
+      if: |
+        "${{ matrix.static }}" == "true"
       run: |
-        if [ "${{ matrix.upx }}" == "true" ]; then
-          upx -9 ${{ matrix.platform }}/${{ matrix.build_config }}/*.exe
-        fi
+        upx -9 ${{ matrix.platform }}/${{ matrix.build_config }}/*.exe
 
     - name: 🗜️ archive binaries
       uses: actions/upload-artifact@v3
