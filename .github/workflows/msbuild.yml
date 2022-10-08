@@ -19,30 +19,30 @@ jobs:
     strategy:
       matrix:
         build_config:
-          - vs2019_ci_dynamic
-          - vs2019_ci_static_xp
-          - vs2022_ci_dynamic
-          - vs2022_ci_static
+          - vs2019_ci_x86_64
+          - vs2019_ci_static_xp_x86
+          - vs2022_ci_x86_64
+          - vs2022_ci_static_x86_64
 
         include:
-          - build_config: vs2019_ci_dynamic
+          - build_config: vs2019_ci_x86_64
             os: windows-2019
             platform: x64
             toolset: v142
             suffix: 'vs2019'
-          - build_config: vs2019_ci_static_xp
+          - build_config: vs2019_ci_static_xp_x86
             os: windows-2019
             platform: x86
             toolset: v141_xp
             suffix: 'vs2019.xp.x86'
             static: 'true'
-          - build_config: vs2022_ci_static
+          - build_config: vs2022_ci_static_x86_64
             os: windows-2022
             platform: x64
             toolset: v143
             static: 'true'
             suffix: 'vs2022.static'
-          - build_config: vs2022_ci_dynamic
+          - build_config: vs2022_ci_x86_64
             os: windows-2022
             platform: x64
             toolset: v143
