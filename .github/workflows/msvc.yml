@@ -125,3 +125,6 @@ jobs:
         token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
         files: |
           *.zip
+
+permissions:
+  contents: write
