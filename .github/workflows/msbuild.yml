@@ -83,23 +83,24 @@ jobs:
       shell: msys2 {0}
       run: |
         cd "${{ matrix.platform }}/${{ env.BUILD_CONFIGURATION }}"
-        mv ducode.exe "ducode.${{ matrix.suffix }}.exe"
-
         if [ "${{ matrix.static }}" == "true" ]; then
           upx -9 *.exe
         fi
+        cp "ducode.exe" "ducode.${{ matrix.suffix }}.exe"
 
     - name: 🗜️ archive binaries
       uses: actions/upload-artifact@v3
       with:
         name: binaries
-        path: ${{ matrix.platform }}/${{ env.BUILD_CONFIGURATION }}/*.exe
+        path: ${{ matrix.platform }}/${{ env.BUILD_CONFIGURATION }}/ducode.${{ matrix.suffix }}.exe
 
     - name: 📦 package for release
       shell: msys2 {0}
       run: |
         cd "${{ matrix.platform }}/${{ env.BUILD_CONFIGURATION }}"
-        zip -9 "../../ducode.${{ matrix.vs_version }}.$(git describe --abbrev=0).zip" *.exe
+        zip -9 \
+          "../../ducode.${{ matrix.suffix }}.$(git describe --abbrev=0).zip" \
+          "ducode.exe"
 
     - name: 📝 draft release
       if: startsWith(github.ref, 'refs/tags/v')
