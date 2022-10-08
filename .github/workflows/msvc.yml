@@ -102,6 +102,7 @@ jobs:
         path: build/ducode.${{ matrix.build_config }}.exe
 
     - name: 📦 package for release
+      if: startsWith(github.ref, 'refs/tags/v')
       shell: msys2 {0}
       run: |
         set -ex
