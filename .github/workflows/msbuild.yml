@@ -39,6 +39,7 @@ jobs:
             os: windows-2022
             platform: x64
             toolset: v143
+            static: 'true'
             suffix: 'vs2022.static'
 
     runs-on: "${{ matrix.os }}"
