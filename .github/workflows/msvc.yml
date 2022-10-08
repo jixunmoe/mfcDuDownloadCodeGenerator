@@ -79,7 +79,8 @@ jobs:
           ${{env.SOLUTION_FILE_PATH}}
         
         New-Item -ItemType Directory build
-        Move-Item -Path ".\$platform\${{ env.BUILD_CONFIGURATION }}\*.exe" -Destination build
+        Move-Item -Path ".\$platform\${{ env.BUILD_CONFIGURATION }}\*.exe" `
+          -Destination ".\build\"
 
     - name: 🗜️ rename + optional upx
       shell: msys2 {0}
