@@ -56,7 +56,8 @@ inline void EnumFiles(const CString &srcDir, bool recursive, f_file_callback cb,
 inline void CopyStringToClipboard(CString &str)
 {
 	auto strW = static_cast<const TCHAR*>(str);
-	auto len = str.GetLength() * sizeof TCHAR + (sizeof TCHAR);
+	auto len = (str.GetLength() + 1) * sizeof TCHAR;
+
 	HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, len);
 	if (!hMem) return;
 
@@ -65,16 +66,16 @@ inline void CopyStringToClipboard(CString &str)
 		GlobalFree(hMem);
 		return;
 	}
-
 	memcpy(lockedMem, strW, len);
 	GlobalUnlock(hMem);
-	OpenClipboard(nullptr);
-	EmptyClipboard();
+
+	if (OpenClipboard(nullptr)) {
+		EmptyClipboard();
 #ifndef _UNICODE
-	SetClipboardData(CF_TEXT, hMem);
+		SetClipboardData(CF_TEXT, hMem);
 #else
-	SetClipboardData(CF_UNICODETEXT, hMem);
+		SetClipboardData(CF_UNICODETEXT, hMem);
 #endif
-	CloseClipboard();
-	GlobalFree(hMem);
+		CloseClipboard();
+	}
 }
