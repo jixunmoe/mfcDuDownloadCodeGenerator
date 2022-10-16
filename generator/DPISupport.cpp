@@ -1,5 +1,6 @@
-#include "DPISupport.h"
 #include "stdafx.h"
+
+#include "DPISupport.h"
 
 #if !__BUILD_FOR_XP
 #include <ShellScalingApi.h>
