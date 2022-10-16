@@ -27,12 +27,12 @@ public:
 	CListBoxEx();
 	virtual ~CListBoxEx();
 
-	COLORREF m_bgSelected = RGB(0, 122, 204);
+	COLORREF m_bgSelected = RGB(204, 232, 255); // #cce8ff
 	COLORREF m_bgClear    = RGB(255, 255, 255);
 	COLORREF m_text = RGB(0, 0, 0);
-	COLORREF m_textSelected = RGB(255, 255, 255);
-	COLORREF m_descText = RGB(0x77, 0x77, 0x77);
-	COLORREF m_descTextSelected = RGB(0xcc, 0xcc, 0xcc);
+	COLORREF m_textSelected = RGB(0, 0, 0);
+	COLORREF m_descText = RGB(109, 109, 109);
+	COLORREF m_descTextSelected = RGB(109, 109, 109);
 
 protected:
 	DECLARE_MESSAGE_MAP()

@@ -6,10 +6,12 @@
 #include "resource.h"
 #include "Hasher.h"
 #include "ClipboardHelper.h"
+#include "DPISupport.h"
 
 #include <fstream>      // std::ifstream
 
 #define BD_FILE_HEADER_SIZE (256 * 1024)
+constexpr double icon_base_dimention = 36.0;
 
 // CListBoxEx
 
@@ -202,19 +204,41 @@ void CListBoxEx::StopProcessing()
 
 void CListBoxEx::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 {
-	lpMeasureItemStruct->itemHeight = 48 + 4*2 + 8;
+	uint32_t dpi = DPISupport::GetWindowDPI(GetSafeHwnd());
+	auto dpi_scale = static_cast<double>(dpi) / 96.0;
+
+	auto icon_height = static_cast<uint32_t>(dpi_scale * icon_base_dimention);
+	auto icon_top_margin = static_cast<uint32_t>(dpi_scale * 8);
+
+	lpMeasureItemStruct->itemHeight = icon_height + icon_top_margin * 2;
 }
 
 void CListBoxEx::DrawItemData(LPDRAWITEMSTRUCT lpDrawItemStruct, CFileItem* pItem)
 {
+	uint32_t dpi = DPISupport::GetWindowDPI(GetSafeHwnd());
+	auto dpi_scale = static_cast<double>(dpi) / 96.0;
+
+	auto icon_width = static_cast<uint32_t>(dpi_scale * icon_base_dimention);
+	auto icon_height = static_cast<uint32_t>(dpi_scale * icon_base_dimention);
+	auto icon_tick_width = static_cast<uint32_t>(dpi_scale * 16.0);
+	auto icon_tick_height = static_cast<uint32_t>(dpi_scale * 16.0);
+	auto icon_right_margin = static_cast<uint32_t>(dpi_scale * 8.0);
+	auto item_padding = static_cast<uint32_t>(dpi_scale * 4.0);
+	auto text_line_margin = static_cast<uint32_t>(dpi_scale * 2.0);
+
 	auto pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 	pDC->SetBkMode(TRANSPARENT);
 
 	CRect rectItem(lpDrawItemStruct->rcItem);
-	rectItem.DeflateRect(4, 4, 4, 4);
-	CRect rectIcon(rectItem.left, rectItem.top, rectItem.left + 48, rectItem.top + 48);
-	CRect rectIconTick(rectIcon.left, rectIcon.top + 48 - 16, rectIcon.left + 16, rectItem.top + 48);
-	CRect rectText(rectIcon.right, rectItem.top, rectItem.right - 8, rectItem.bottom);
+	rectItem.DeflateRect(item_padding, item_padding, item_padding, item_padding);
+	CRect rectIcon(rectItem.left, rectItem.top, rectItem.left + icon_width, rectItem.top + icon_height);
+	CRect rectIconTick(
+		rectIcon.left,
+		rectIcon.top + icon_height - icon_tick_height,
+		rectIcon.left + icon_tick_width,
+		rectItem.top + icon_height - icon_tick_height
+	);
+	CRect rectText(rectIcon.right + icon_right_margin, rectItem.top, rectItem.right - icon_right_margin * 2, rectItem.bottom);
 
 	auto action = lpDrawItemStruct->itemAction;
 	auto state = lpDrawItemStruct->itemState;
@@ -229,7 +253,6 @@ void CListBoxEx::DrawItemData(LPDRAWITEMSTRUCT lpDrawItemStruct, CFileItem* pIte
 	CBrush brushText(textColour);
 	CBrush brushDescText(descTextColour);
 
-
 	if (selected || redraw)
 	{
 		CString str;
@@ -238,27 +261,26 @@ void CListBoxEx::DrawItemData(LPDRAWITEMSTRUCT lpDrawItemStruct, CFileItem* pIte
 
 		if (pItem->m_pFullHash)
 		{
-			DrawIconEx(*pDC, rectIconTick.left, rectIconTick.top, m_hIconTick, 16, 16, NULL, nullptr, DI_NORMAL);
+			DrawIconEx(*pDC, rectIconTick.left, rectIconTick.top, m_hIconTick, icon_tick_width, icon_tick_height, NULL, nullptr, DI_NORMAL);
 		}
-
 
 		auto rect = rectText;
 		pDC->SetTextColor(textColour);
-		rect.OffsetRect(2, 0);
+		rect.OffsetRect(text_line_margin, 0);
 
 		str.SetString(*pItem->m_pFilename);
 		pDC->DrawText(str, str.GetLength(), rect, DT_LEFT | DT_SINGLELINE | DT_END_ELLIPSIS);
-		rect.OffsetRect(0, 2 + pDC->GetTextExtent(str).cy);
+		rect.OffsetRect(0, text_line_margin + pDC->GetTextExtent(str).cy);
 
 
 		str.Format(IDS_DIR, *pItem->m_pDirectory);
 		pDC->SetTextColor(descTextColour);
 		pDC->DrawText(str, str.GetLength(), rect, DT_LEFT | DT_SINGLELINE | DT_END_ELLIPSIS);
-		rect.OffsetRect(0, 2 + pDC->GetTextExtent(str).cy);
+		rect.OffsetRect(0, text_line_margin + pDC->GetTextExtent(str).cy);
 
 		str.Format(IDS_FILE_SIZE, pItem->GetSizeString());
 		pDC->DrawText(str, str.GetLength(), rect, DT_LEFT | DT_SINGLELINE);
-		rect.OffsetRect(0, 2 + pDC->GetTextExtent(str).cy);
+		rect.OffsetRect(0, text_line_margin + pDC->GetTextExtent(str).cy);
 	}
 }
 
@@ -338,7 +360,6 @@ int CListBoxEx::VKeyToItem(UINT nKey, UINT nIndex)
 
 	if(mutex.try_lock())
 	{
-		// ReSharper disable once CppDefaultCaseNotHandledInSwitchStatement
 		switch (nKey)
 		{
 		case 'E':

@@ -103,17 +103,15 @@ BOOL CAppDlg::OnInitDialog()
 
 	// Set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
-	SetIcon(m_hIcon, TRUE);			// Set big icon
+	SetIcon(m_hIcon, TRUE);		// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
-	// TODO: Add extra initialization here
 	CRegKey reg;
 	if (reg.Open(HKEY_CURRENT_USER, _T("Software\\Jixun.Moe\\DuGenerator"), KEY_READ) == ERROR_SUCCESS)
 	{
 		DWORD dwLang;
 		if (reg.QueryDWORDValue(_T("LANG_ID"), dwLang) == ERROR_SUCCESS)
 		{
-			// SetThreadUILanguage(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED));
 			SetThreadUILanguage(LANGID(dwLang));
 		}
 
@@ -129,7 +127,6 @@ BOOL CAppDlg::OnInitDialog()
 	std::ignore = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
 	m_editOutput.SetLimitText(0);
-
 
 #if _DEBUG
 	{
