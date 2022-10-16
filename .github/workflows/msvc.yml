@@ -75,6 +75,10 @@ jobs:
           elseif ($config.Contains('.xp.')) { "v141_xp" }
           else { "v142" }
 
+        if ($config.Contains('.xp.')) {
+          $env:_CL_ += ' /D__BUILD_FOR_XP=1'
+        }
+
         msbuild /m `
           /p:Configuration=${{ env.BUILD_CONFIGURATION }} `
           /p:Platform=$platform `
