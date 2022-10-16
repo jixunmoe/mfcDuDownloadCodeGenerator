@@ -2,8 +2,10 @@
 //
 
 #include "stdafx.h"
+
 #include "generator.h"
 #include "ProgressText.h"
+#include "DPISupport.h"
 
 void inline shrink(CRect* rect) {
 	rect->left++;
@@ -30,30 +32,11 @@ void CProgressText::Init()
 {
 	text = new CString("");
 
-	Colour = RGB(66, 244, 161);
-	BkColour = RGB(0xE6, 0xE6, 0xE6);
-	BdColour = RGB(0xBC, 0xBC, 0xBC);
-
-	brushForeground = new CBrush(Colour);
-	brushBackground = new CBrush(BkColour);
-	brushBorder = new CBrush(BdColour);
+	progressForegroundBrush = new CBrush(progressForegroundColour);
+	progressBackgroundBrush = new CBrush(progressBackgroundColour);
+	componentBorderBrush = new CBrush(componentBorderColour);
 
 	font = new CFont();
-	VERIFY(CProgressText::font->CreateFont(
-		16,                        // nHeight
-		0,                         // nWidth
-		0,                         // nEscapement
-		0,                         // nOrientation
-		FW_NORMAL,                 // nWeight
-		FALSE,                     // bItalic
-		FALSE,                     // bUnderline
-		0,                         // cStrikeOut
-		ANSI_CHARSET,              // nCharSet
-		OUT_DEFAULT_PRECIS,        // nOutPrecision
-		CLIP_DEFAULT_PRECIS,       // nClipPrecision
-		DEFAULT_QUALITY,           // nQuality
-		DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
-		_T("Consolas")));          // lpszFacename
 }
 
 void CProgressText::SetCurrent(uint current)
@@ -116,60 +99,73 @@ void CProgressText::OnPaint()
 	CPaintDC dc(this); // device context for painting
 					   // Do not call CProgressCtrl::OnPaint() for painting messages
 
-	CRect rcClipBox;
-	dc.GetClipBox(rcClipBox);
+	double dpi_scale = double(DPISupport::GetWindowDPI(GetSafeHwnd())) / 96.0;
+
+	CRect rect;
+	GetClientRect(&rect);
 
 	CDC memDC;
 	memDC.CreateCompatibleDC(&dc);
 	memDC.SetMapMode(dc.GetMapMode());
 	memDC.SetViewportOrg(dc.GetViewportOrg());
-	memDC.IntersectClipRect(rcClipBox);
+	memDC.IntersectClipRect(rect);
 
 	CBitmap bmp;
-	bmp.CreateCompatibleBitmap(&dc, rcClipBox.Width(), rcClipBox.Height());
+	bmp.CreateCompatibleBitmap(&dc, rect.Width(), rect.Height());
 	auto pOldBmp = memDC.SelectObject(&bmp);
-
-
-
-	CRect rect;
-	GetClientRect(&rect);
-	auto rectDraw = rect;
 
 	memDC.SetBkMode(TRANSPARENT);
 
 	// 绘制一圈边框
 	memDC.SelectObject(GetStockObject(DC_PEN));
-	memDC.SetDCPenColor(this->BdColour);
-	memDC.Rectangle(rectDraw);
+	memDC.SetDCPenColor(this->componentBorderColour);
+	memDC.Rectangle(rect);
 
 	// 绘制四方形
-	shrink(&rect);
-	memDC.FillRect(rect, this->brushBackground);
+	{
+		auto rectProgress = rect;
+		shrink(&rectProgress);
+		memDC.FillRect(rectProgress, this->progressBackgroundBrush);
 
-	rect.right = rect.left + LONG((rect.right - rect.left) * this->percent);
-	memDC.FillRect(rect, this->brushForeground);
+		rectProgress.right = rectProgress.left + LONG(rectProgress.Width() * this->percent);
+		memDC.FillRect(rectProgress, this->progressForegroundBrush);
+	}
 
+	auto font_height = static_cast<uint32_t>((rect.Height() - 4) * dpi_scale * 0.75);
+	font->DeleteObject();
+	VERIFY(font->CreateFont(
+		font_height,               // nHeight
+		0,                         // nWidth
+		0,                         // nEscapement
+		0,                         // nOrientation
+		FW_NORMAL,                 // nWeight
+		FALSE,                     // bItalic
+		FALSE,                     // bUnderline
+		0,                         // cStrikeOut
+		ANSI_CHARSET,              // nCharSet
+		OUT_DEFAULT_PRECIS,        // nOutPrecision
+		CLIP_DEFAULT_PRECIS,       // nClipPrecision
+		DEFAULT_QUALITY,           // nQuality
+		DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
+		_T("Consolas")));          // lpszFacename
 
 	auto def_font = memDC.SelectObject(font);
 	auto size = memDC.GetTextExtent(*text);
-	auto x = rectDraw.right - size.cx - 5;
-	auto y = (rectDraw.bottom - rectDraw.top - size.cy) / 2;
+	auto x = rect.right - size.cx - 8;
+	auto y = (rect.Height() - size.cy) / 2;
 	memDC.TextOut(x, y, *text, this->text->GetLength());
 	memDC.SelectObject(def_font);
 
 	// 拷贝图片
-	dc.BitBlt(rcClipBox.left, rcClipBox.top, rcClipBox.Width(), rcClipBox.Height(), &memDC, rcClipBox.left, rcClipBox.top, SRCCOPY);
+	dc.BitBlt(rect.left, rect.top, rect.Width(), rect.Height(), &memDC, rect.left, rect.top, SRCCOPY);
 
 	// 还原选择的对象
 	memDC.SelectObject(pOldBmp);
-
-	// dc.TextOut(0, 0, L"test", 4);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
 // ReSharper disable once CppMemberFunctionMayBeConst
 BOOL CProgressText::OnEraseBkgnd(CDC* pDC)
 {
-	// return CProgressCtrl::OnEraseBkgnd(pDC);
 	return TRUE;
 }

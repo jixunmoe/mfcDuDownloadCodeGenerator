@@ -5,12 +5,13 @@
 class CProgressText : public CProgressCtrl
 {
 	CFont* font;
-	COLORREF Colour;
-	COLORREF BkColour;
-	COLORREF BdColour;
-	CBrush* brushForeground;
-	CBrush* brushBackground;
-	CBrush* brushBorder;
+	COLORREF progressForegroundColour = RGB(62, 231, 152);
+	COLORREF progressBackgroundColour = RGB(0xE6, 0xE6, 0xE6);
+	COLORREF componentBorderColour = RGB(0xBC, 0xBC, 0xBC);
+
+	CBrush* progressForegroundBrush;
+	CBrush* progressBackgroundBrush;
+	CBrush* componentBorderBrush;
 	void Init();
 
 	DECLARE_DYNAMIC(CProgressText)
