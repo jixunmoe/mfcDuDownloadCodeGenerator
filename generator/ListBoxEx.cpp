@@ -4,9 +4,10 @@
 #include "stdafx.h"
 #include "ListBoxEx.h"
 #include "resource.h"
-#include <fstream>      // std::ifstream
 #include "Hasher.h"
-#include "utils.h"
+#include "ClipboardHelper.h"
+
+#include <fstream>      // std::ifstream
 
 #define BD_FILE_HEADER_SIZE (256 * 1024)
 

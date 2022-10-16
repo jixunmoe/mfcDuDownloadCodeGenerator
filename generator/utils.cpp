@@ -1,13 +1,6 @@
 ﻿#include "stdafx.h"
 #include "utils.h"
 
-/*
-int CALLBACK cb_set_initial(HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
-{
-	
-}
-*/
-
 std::vector<CString*> OldStyleFileDialog(const CString& title, HWND hwnd)
 {
 	std::vector<CString*> v;
@@ -111,4 +104,54 @@ std::vector<CString*> OpenFileDialog(CString &title, HWND hWnd)
 	auto err = OpenFileDialog(title, hWnd, 0, r);
 	if (err == 1) return OldStyleFileDialog(title, hWnd);
 	return r;
+}
+
+
+void EnumFiles(const CString& srcDir, bool recursive, f_file_callback cb, void* extra) {
+	auto dir(srcDir);
+	if (dir.Right(1).Compare(_T("\\")) == 0)
+	{
+		dir.AppendChar(_T('*'));
+	}
+	else
+	{
+		dir.Append(_T("\\*"));
+	}
+
+	WIN32_FIND_DATA ffd;
+	auto hFind = FindFirstFile(dir, &ffd);
+	if (hFind == INVALID_HANDLE_VALUE)
+	{
+		return;
+	}
+
+	do
+	{
+		if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		{
+			if (recursive)
+			{
+				if (_tcscmp(ffd.cFileName, _T(".")) != 0
+					&& _tcscmp(ffd.cFileName, _T("..")) != 0)
+				{
+#if _DEBUG
+					CString str;
+					str.Format(_T("enter dir: %s\n"), ffd.cFileName);
+					OutputDebugString(str);
+#endif
+					EnumFiles(srcDir + _T("\\") + ffd.cFileName, recursive, cb, extra);
+				}
+			}
+		}
+		else
+		{
+#if _DEBUG
+			CString str;
+			str.Format(_T("add file: %s\n"), ffd.cFileName);
+			OutputDebugString(str);
+#endif
+			cb(srcDir, ffd.cFileName, extra);
+		}
+	} while (FindNextFile(hFind, &ffd) != 0);
+	FindClose(hFind);
 }

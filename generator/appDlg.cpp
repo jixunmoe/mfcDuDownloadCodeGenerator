@@ -8,6 +8,7 @@
 #include "afxdialogex.h"
 #include "utils.h"
 #include "base64.h"
+#include "ClipboardHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -416,5 +417,5 @@ void CAppDlg::OnBnClickedBtnCopy()
 {
 	CString str;
 	m_editOutput.GetWindowText(str);
-	CopyStringToClipboard(str);
+	CopyStringToClipboard(str, GetSafeHwnd());
 }

@@ -199,6 +199,7 @@
   <ItemGroup>
     <ClInclude Include="AdvEdit.h" />
     <ClInclude Include="appDlg.h" />
+    <ClInclude Include="ClipboardHelper.h" />
     <ClInclude Include="encoding.h" />
     <ClInclude Include="FileItem.h" />
     <ClInclude Include="generator.h" />
@@ -215,6 +216,7 @@
     <ClCompile Include="AdvEdit.cpp" />
     <ClCompile Include="appDlg.cpp" />
     <ClCompile Include="base64.cpp" />
+    <ClCompile Include="ClipboardHelper.cpp" />
     <ClCompile Include="encoding.cpp" />
     <ClCompile Include="FileItem.cpp" />
     <ClCompile Include="generator.cpp" />
