@@ -30,6 +30,12 @@ bool CFileItem::Done() const
 
 CString CFileItem::GetSizeString() const
 {
+	CString str;
+	if (m_nSize == 0) {
+		str = TEXT("0");
+		return str;
+	}
+
 	TCHAR sizes[][6] = {
 		_T("B"),
 		_T("KB"),
@@ -43,7 +49,6 @@ CString CFileItem::GetSizeString() const
 	auto unit = int(floor(power));
 	auto r = m_nSize / pow(1024, unit);
 
-	CString str;
 	str.Format(_T("%.2f %s"), r, sizes[unit]);
 	return str;
 }
