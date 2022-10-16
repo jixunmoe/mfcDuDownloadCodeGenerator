@@ -326,21 +326,31 @@ void CAppDlg::AppendVersionNumber()
 	}
 
 	LPVOID lpBuffer = nullptr;
-	UINT dwBytes = 0;
+	UINT dwCharCount = 0;
 
-	if (VerQueryValueW(versionInfo, L"\\StringFileInfo\\080004B0\\FileVersion", &lpBuffer, &dwBytes)) {
+	if (VerQueryValue(versionInfo, L"\\StringFileInfo\\080004B0\\FileVersion", &lpBuffer, &dwCharCount)) {
 		CString strTitle;
 		GetWindowText(strTitle);
 
+		auto strVersionString = new TCHAR[dwCharCount + 1];
+		memcpy(strVersionString, lpBuffer, dwCharCount * sizeof(TCHAR));
+		strVersionString[dwCharCount] = 0;
+
+		auto pLastDot = _tcsrchr(strVersionString, _T('.'));
+		if (pLastDot != nullptr) {
+			*pLastDot = 0;
+		}
+
 		strTitle += _T(" (v");
-		strTitle += (TCHAR*)lpBuffer;
+		strTitle += strVersionString;
 		strTitle += _T(")");
 		SetWindowText(strTitle);
+
+		delete[] strVersionString;
 	}
 
 	UnlockResource(hGlobal);
 	FreeResource(hVersion);
-
 }
 
 DWORD WINAPI _thread_stop_process(void* param)
