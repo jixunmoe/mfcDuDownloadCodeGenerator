@@ -263,13 +263,16 @@ void CAppDlg::ProcessFiles()
 
 void CAppDlg::AddHashEntry(CFileItem* data)
 {
+	if (m_editOutput.GetWindowTextLengthW() > 0) {
+		m_editOutput.Append(_T("\r\n"));
+	}
+
 	if (m_chkUrl.GetCheck() == BST_CHECKED) {
 		m_editOutput.Append(data->BDLink());
 	}
 	else {
 		m_editOutput.Append(data->DownloadCode());
 	}
-	m_editOutput.Append(_T("\r\n"));
 }
 
 void CAppDlg::ProcFile(ProcType proc, double progress, CFileItem* lp_item)
