@@ -65,17 +65,17 @@ void Hasher::Cleanup()
 }
 
 
-CString* Hasher::GetHashStr()
+CString Hasher::GetHashStr()
 {
-	DWORD dwDataLen;
-	auto r = new CString("");
+	DWORD dwDataLen = 0;
+	auto r = CString("");
 	if (CryptGetHashParam(this->m_phHash, HP_HASHVAL, nullptr, &dwDataLen, 0))
 	{
 		BYTE* d = new BYTE[dwDataLen];
 		CryptGetHashParam(this->m_phHash, HP_HASHVAL, d, &dwDataLen, 0);
 		for(DWORD i = 0; i < dwDataLen; i++)
 		{
-			r->AppendFormat(_T("%X%X"), d[i] >> 4, d[i] & 0x0F);
+			r.AppendFormat(_T("%X%X"), d[i] >> 4, d[i] & 0x0F);
 		}
 		delete[] d;
 	}

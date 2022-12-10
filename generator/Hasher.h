@@ -15,7 +15,7 @@ public:
 
 	void Cleanup();
 
-	CString* GetHashStr();
+	CString GetHashStr();
 	void Feed(char* str, int i) const;
 };
 

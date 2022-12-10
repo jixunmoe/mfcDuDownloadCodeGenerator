@@ -2,13 +2,14 @@
 class CFileItem
 {
 public:
-	CString* m_pDirectory = nullptr;
-	CString* m_pFilename = nullptr;
-	HICON m_hIcon = nullptr;
+	CString m_pDirectory = CString("");
+	CString m_pBaseDirectory = CString("");
+	CString m_pFilename = CString("");
+	HICON m_hIcon;
 	uint64_t m_nSize = 0;
 
-	CString* m_pFirstHash = nullptr;
-	CString* m_pFullHash = nullptr;
+	CString m_pFirstHash = CString("");
+	CString m_pFullHash = CString("");
 
 public:
 	CFileItem();
