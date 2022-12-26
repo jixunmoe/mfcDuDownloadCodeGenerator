@@ -209,8 +209,7 @@ void CAppDlg::OnClickedBtnAddDir()
 	auto dirs = OpenDirectoryDialog(m_ofn_dir_title, GetSafeHwnd());
 	for(auto& dir : dirs)
 	{
-		EnumFiles(*dir, BST_CHECKED == m_chkRecursive.GetCheck(), cb_add_file, this);
-		delete dir;
+		EnumFiles(dir, BST_CHECKED == m_chkRecursive.GetCheck(), cb_add_file, this);
 	}
 }
 

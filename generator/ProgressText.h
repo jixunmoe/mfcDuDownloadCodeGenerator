@@ -17,7 +17,7 @@ class CProgressText : public CProgressCtrl
 	DECLARE_DYNAMIC(CProgressText)
 	uint current = 0;
 	uint max = 0;
-	CString* text;
+	CString text = CString("");
 	double percent = 0;
 
 public:

@@ -113,7 +113,7 @@ void CListBoxEx::ProcessFiles(f_proc_file_callback cb, void* extra)
 			continue;
 		}
 
-		auto path(*data->m_pDirectory + _T("\\") + *data->m_pFilename);
+		auto path(data->m_pDirectory + _T("\\") + data->m_pFilename);
 		std::ifstream is(path, std::ifstream::binary);
 
 		if (!is)
@@ -133,7 +133,7 @@ void CListBoxEx::ProcessFiles(f_proc_file_callback cb, void* extra)
 			is.close();
 
 			// 更新完整哈希
-			data->m_pFullHash = new CString(*data->m_pFirstHash);
+			data->m_pFullHash = CString(data->m_pFirstHash);
 
 			// 重绘 + 通知
 			this->RedrawIfVisible(i);
@@ -259,7 +259,7 @@ void CListBoxEx::DrawItemData(LPDRAWITEMSTRUCT lpDrawItemStruct, CFileItem* pIte
 		pDC->FillRect(&lpDrawItemStruct->rcItem, &brushBackground);
 		pDC->DrawIcon(rectIcon.left, rectIcon.top, pItem->m_hIcon);
 
-		if (pItem->m_pFullHash)
+		if (pItem->Done())
 		{
 			DrawIconEx(*pDC, rectIconTick.left, rectIconTick.top, m_hIconTick, icon_tick_width, icon_tick_height, NULL, nullptr, DI_NORMAL);
 		}
@@ -268,12 +268,12 @@ void CListBoxEx::DrawItemData(LPDRAWITEMSTRUCT lpDrawItemStruct, CFileItem* pIte
 		pDC->SetTextColor(textColour);
 		rect.OffsetRect(text_line_margin, 0);
 
-		str.SetString(*pItem->m_pFilename);
+		str.SetString(pItem->m_pFilename);
 		pDC->DrawText(str, str.GetLength(), rect, DT_LEFT | DT_SINGLELINE | DT_END_ELLIPSIS);
 		rect.OffsetRect(0, text_line_margin + pDC->GetTextExtent(str).cy);
 
 
-		str.Format(IDS_DIR, *pItem->m_pDirectory);
+		str.Format(IDS_DIR, pItem->m_pDirectory);
 		pDC->SetTextColor(descTextColour);
 		pDC->DrawText(str, str.GetLength(), rect, DT_LEFT | DT_SINGLELINE | DT_END_ELLIPSIS);
 		rect.OffsetRect(0, text_line_margin + pDC->GetTextExtent(str).cy);
@@ -321,8 +321,8 @@ int CListBoxEx::AddItem(const CString& srcDir, const CString& filename)
 
 	auto index = this->AddString(_T(""));
 	auto data = new CFileItem();
-	data->m_pDirectory = new CString(srcDir);
-	data->m_pFilename = new CString(filename);
+	data->m_pDirectory = CString(srcDir);
+	data->m_pFilename = CString(filename);
 
 	SHFILEINFO shfi = {};
 	SHGetFileInfo(fullPath, FILE_ATTRIBUTE_NORMAL, &shfi, sizeof(SHFILEINFO),
@@ -434,7 +434,6 @@ BOOL CListBoxEx::OnToolTipText(UINT id, NMHDR * pNMHDR, LRESULT * pResult)
 		*pItem->m_pFilename,
 		*pItem->m_pDirectory,
 		 pItem->GetSizeString());
-
 
 	auto strW = static_cast<const TCHAR*>(str);
 	auto memSize = str.GetLength() * sizeof TCHAR + (2 * sizeof TCHAR);

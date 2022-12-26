@@ -1,9 +1,9 @@
 ﻿#include "stdafx.h"
 #include "utils.h"
 
-std::vector<CString*> OldStyleFileDialog(const CString& title, HWND hwnd)
+std::vector<CString> OldStyleFileDialog(const CString& title, HWND hwnd)
 {
-	std::vector<CString*> v;
+	std::vector<CString> v;
 	CString str;
 	OPENFILENAME ofn = {0};
 	ofn.lStructSize = sizeof ofn;
@@ -13,16 +13,16 @@ std::vector<CString*> OldStyleFileDialog(const CString& title, HWND hwnd)
 	ofn.nMaxFile = 1024;
 	if (GetOpenFileName(&ofn))
 	{
-		v.push_back(new CString(str));
+		v.push_back(CString(str));
 	}
 	str.ReleaseBuffer();
 
 	return v;
 }
 
-inline std::vector<CString*> OldStyleDirectoryDialog(CString &title, HWND hWnd)
+inline std::vector<CString> OldStyleDirectoryDialog(CString &title, HWND hWnd)
 {
-	std::vector<CString*> v;
+	std::vector<CString> v;
 	BROWSEINFO bi;
 	ZeroMemory(&bi, sizeof bi);
 	bi.hwndOwner = hWnd;
@@ -33,12 +33,12 @@ inline std::vector<CString*> OldStyleDirectoryDialog(CString &title, HWND hWnd)
 	TCHAR szPath[1024];
 	if (SHGetPathFromIDList(SHBrowseForFolder(&bi), szPath))
 	{
-		v.push_back(new CString(szPath));
+		v.push_back(CString(szPath));
 	}
 	return v;
 }
 
-DWORD OpenFileDialog(CString &title, HWND hWnd, DWORD flag, std::vector<CString*> &v)
+DWORD OpenFileDialog(CString &title, HWND hWnd, DWORD flag, std::vector<CString> &v)
 {
 	IFileOpenDialog* pFileOpen;
 	do
@@ -76,7 +76,7 @@ DWORD OpenFileDialog(CString &title, HWND hWnd, DWORD flag, std::vector<CString*
 			TCHAR* filePath;
 			pItem->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &filePath);
 
-			v.push_back(new CString(filePath));
+			v.push_back(CString(filePath));
 
 			CoTaskMemFree(filePath);
 			pItem->Release();
@@ -90,17 +90,17 @@ DWORD OpenFileDialog(CString &title, HWND hWnd, DWORD flag, std::vector<CString*
 	return 0;
 }
 
-std::vector<CString*> OpenDirectoryDialog(CString &title, HWND hWnd)
+std::vector<CString> OpenDirectoryDialog(CString &title, HWND hWnd)
 {
-	std::vector<CString*> r;
+	std::vector<CString> r;
 	auto err = OpenFileDialog(title, hWnd, FOS_PICKFOLDERS, r);
 	if (err == 1) return OldStyleDirectoryDialog(title, hWnd);
 	return r;
 }
 
-std::vector<CString*> OpenFileDialog(CString &title, HWND hWnd)
+std::vector<CString> OpenFileDialog(CString &title, HWND hWnd)
 {
-	std::vector<CString*> r;
+	std::vector<CString> r;
 	auto err = OpenFileDialog(title, hWnd, 0, r);
 	if (err == 1) return OldStyleFileDialog(title, hWnd);
 	return r;
