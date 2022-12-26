@@ -25,13 +25,10 @@ CProgressText::CProgressText()
 
 CProgressText::~CProgressText()
 {
-	SAFE_DELETE(text);
 }
 
 void CProgressText::Init()
 {
-	text = new CString("");
-
 	progressForegroundBrush = new CBrush(progressForegroundColour);
 	progressBackgroundBrush = new CBrush(progressBackgroundColour);
 	componentBorderBrush = new CBrush(componentBorderColour);
@@ -72,12 +69,12 @@ void CProgressText::Reset()
 void CProgressText::UpdateText() {
 	if (this->max == 0) {
 		this->percent = 0;
-		this->text->SetString(_T(""));
+		text.SetString(_T(""));
 	}
 	else
 	{
 		this->percent = double(this->current) / double(this->max);
-		this->text->Format(_T("%d / %d (%.2f%%)"), this->current, this->max, this->percent * 100);
+		text.Format(_T("%d / %d (%.2f%%)"), this->current, this->max, this->percent * 100);
 	}
 }
 
@@ -150,10 +147,10 @@ void CProgressText::OnPaint()
 		_T("Consolas")));          // lpszFacename
 
 	auto def_font = memDC.SelectObject(font);
-	auto size = memDC.GetTextExtent(*text);
+	auto size = memDC.GetTextExtent(text);
 	auto x = rect.right - size.cx - 8;
 	auto y = (rect.Height() - size.cy) / 2;
-	memDC.TextOut(x, y, *text, this->text->GetLength());
+	memDC.TextOut(x, y, text, this->text.GetLength());
 	memDC.SelectObject(def_font);
 
 	// 拷贝图片
